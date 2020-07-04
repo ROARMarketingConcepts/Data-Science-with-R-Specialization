@@ -106,12 +106,12 @@ corr <- function(directory, threshold = 0) {
 }
 ```
 
-```{r}
+```{r Corr Function Test #1}
 v = corr("specdata",150)
 v
 ```
 
-```{r}
+```{r Corr Function Test #2}
 cr <- corr("specdata")                
 cr <- sort(cr)   
 RNGversion("3.5.1")
@@ -119,7 +119,8 @@ set.seed(868)
 out <- round(cr[sample(length(cr), 5)], 4)
 print(out)
 ```
-```{r}
+
+```{r Corr Function Test #3]
 cr <- corr("specdata", 129)                
 cr <- sort(cr)                
 n <- length(cr)    
@@ -128,7 +129,8 @@ set.seed(197)
 out <- c(n, round(cr[sample(n, 5)], 4))
 print(out)
 ```
-```{r}
+
+```{r Corr Function Test #4}
 cr <- corr("specdata", 2000)                
 n <- length(cr)                
 cr <- corr("specdata", 1000)                

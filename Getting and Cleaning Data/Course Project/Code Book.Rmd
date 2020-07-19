@@ -1,0 +1,18 @@
+---
+title: "Code Book"
+author: "Ken Wood"
+date: "7/18/2020"
+output: html_document
+---
+
+Fitbit devices use a 3-axis accelerometer to determine body movement and actions. This sensor also allows a device to determine the frequency, duration, intensity, and patterns of a person's movement. Below is a table of tokens used in the dataset feature names and a brief description of each token.
+
+Token    |     Description
+---------|-----------------
+Body     | Signal based on the body of the fitbit wearer, one of two components derived from the time-based signals on the phone's accelerometer.
+Freq     | Measurement made in the 'frequency' domain (as opposed to the 'time' domain), taken as a Fast Fourier Transform (FFT) of the time-based signals.
+Gravity  | Signal based on gravity, the force that attracts an object with mass to the center of the earth. Gravity is the second of the two measurement components derived from the the phone's accelerometer.
+Acc      | Acceleration is measured as the vector sum of forces on a body (i.e., body-generated forces, gravity) divided by the body's mass.
+Gyro     | Gyroscope sensor signal that measures the fitbit's angular velocity along 3 orthogonal axes (X, Y and Z).
+Jerk     | Jerk is the rate at which an object's acceleration changes with respect to time.
+Mag      | The magnitude of a force vector, defined as the Euclidean norm. For example, a three-dimensional vector, $c(x,y,z)$, will have magnitude $\sqrt{x^2 + y^2 + z^2}$.

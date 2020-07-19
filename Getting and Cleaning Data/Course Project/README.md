@@ -49,23 +49,31 @@ l.    Combine subject_train and subject_test to "Subject" column.
 2. Extract only the measurements on the mean and standard deviation for each measurement.
 
 a. Select columns that only contain means and standard deviations. The grep pattern is `mean\\(\\)` and `std\\(\\)`.
+
 b. Select column names with means.
+
 c. Select column names with standard deviations.
+
 d. Combine the two dataframes and place the columns in alphabetical order.
 
 3. Use descriptive activity names to name the activities in the data set
 4. Appropriately label the data set with descriptive variable names. 
 
 a. Add activity and subject vectors to final_df.
+
 b. Adjust typo for columns with "BodyBody" in their name.
+
 c. Uncode the activities in the "Activities" column.
 
 5. From the data set in step 4, create a second, independent tidy data set with the 
 average of each variable for each activity and each subject.
 
 a. Sort final_df by Activity and Subject.
-b. Calculate mean values for each of the columns
+
+b. Calculate mean values for each of the columns.
+
 c. Clean up columns in the newly formed "means" dataframe.
+
 d. To create 'tidy' data, place "Subject" column at beginning of dataframe.
 
 ```

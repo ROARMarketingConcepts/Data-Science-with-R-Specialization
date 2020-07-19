@@ -22,29 +22,29 @@ Here are the steps taken in my scripts for each of these requirements:
 
 1. Merge the training and the test sets to create one data set.
 
-a.    Download the data files.
+  a.    Download the data files.
 
-b.    Read in the features from "features.txt".
+  b.    Read in the features from "features.txt".
 
-c.    Assign second column of "feature_list" to "feature_vector".
+  c.    Assign second column of "feature_list" to "feature_vector".
 
-d.    Read in X_train and assign column labels from 'feature_vector'.
+  d.    Read in X_train and assign column labels from 'feature_vector'.
 
-e.    Read in y_train and assign column label "Activity".
+  e.    Read in y_train and assign column label "Activity".
 
-f.    Read in subject_train.txt and assign column label "Subject".
+  f.    Read in subject_train.txt and assign column label "Subject".
 
-g.    Read in X_test and assign column labels from 'feature_vector'.
+  g.    Read in X_test and assign column labels from 'feature_vector'.
 
-h.    Read in y_test and assign column label "Activity".
+  h.    Read in y_test and assign column label "Activity".
 
-i.    Read in subject_test and assign column label "Subject".
+  i.    Read in subject_test and assign column label "Subject".
 
-j.    Combine X_train and X_test to form df.
+  j.    Combine X_train and X_test to form df.
 
-k.    Combine y_train and y_test to "Activity" column.
+  k.    Combine y_train and y_test to "Activity" column.
 
-l.    Combine subject_train and subject_test to "Subject" column.
+  l.    Combine subject_train and subject_test to "Subject" column.
 
 2. Extract only the measurements on the mean and standard deviation for each measurement.
 

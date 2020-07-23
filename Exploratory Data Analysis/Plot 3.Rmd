@@ -1,0 +1,47 @@
+---
+title: "Plot 3"
+author: "Ken Wood"
+date: "7/23/2020"
+output: html_document
+---
+
+```{r}
+# We will only be using data from the dates 2007-02-01 and 2007-02-02.
+# One alternative is to read the data from just those dates rather than
+# reading in the entire dataset and subsetting to those dates.
+
+# Need to specify that the field separator in
+# "household_power_consumption.txt" is a semicolon (;)
+library(sqldf)
+
+df <- suppressWarnings(read.csv.sql("household_power_consumption.txt", header = TRUE,sep = ";", sql = "select * from file where Date in ('1/2/2007','2/2/2007')"))
+
+# We get warnings with this code
+
+# df <- read.csv.sql("household_power_consumption.txt", header = TRUE,sep = ";", sql = "select * from file where Date = '1/2/2007' or Date = '2/2/2007'")
+```
+
+```{r}
+# We  may find it useful to convert the Date and Time variables to Date/Time classes in R using the 'as.Date() and 'strptime()' functions.
+
+df$DateTime <- strptime(paste(df$Date, df$Time), "%d/%m/%Y %H:%M:%S")
+
+# df$Date <- as.Date(df$Date, tryFormats = c("%d/%m/%Y"))
+df$Time <- strptime(df$Time,format = "%H:%M:%S")
+```
+
+```{r Plot #3}
+# Plot #3
+
+# Set up R-Studio to write the plot to a PNG file.
+png(filename = "plot3.png", width = 480, height = 480,
+    pointsize = 12, bg = "white",  res = NA)
+
+plot(df$DateTime, df$Sub_metering_1,type = "n",xlab="",ylab = "Energy sub metering")
+lines(df$DateTime, df$Sub_metering_1)
+lines(df$DateTime, df$Sub_metering_2,col="red")
+lines(df$DateTime, df$Sub_metering_3,col="blue")
+legend("topright", legend=c("Sub_metering_1", "Sub_metering_2","Sub_metering_3"),col = c("black","red","blue"),lty=1,cex=0.7)
+```
+
+

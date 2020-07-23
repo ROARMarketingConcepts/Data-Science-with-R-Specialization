@@ -43,6 +43,9 @@ png(filename = "plot2.png", width = 480, height = 480,
 
 plot(df$DateTime, df$Global_active_power,type = "n",xlab="",ylab = "Global Active Power (kilowatts)")
 lines(df$DateTime, df$Global_active_power)
+
+# Turn off PNG device after writing.
+dev.off()
 ```
 
 

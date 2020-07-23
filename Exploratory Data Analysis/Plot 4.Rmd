@@ -63,5 +63,6 @@ legend("topright", legend=c("Sub_metering_1", "Sub_metering_2","Sub_metering_3")
 plot(df$DateTime, df$Global_reactive_power,type = "n",xlab="",ylab="Global_reactive_power")
 lines(df$DateTime, df$Global_reactive_power)
 
-
+# Turn off PNG device after writing.
+dev.off()
 ```

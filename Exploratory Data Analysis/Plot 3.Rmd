@@ -42,6 +42,9 @@ lines(df$DateTime, df$Sub_metering_1)
 lines(df$DateTime, df$Sub_metering_2,col="red")
 lines(df$DateTime, df$Sub_metering_3,col="blue")
 legend("topright", legend=c("Sub_metering_1", "Sub_metering_2","Sub_metering_3"),col = c("black","red","blue"),lty=1,cex=0.7)
+
+# Turn off PNG device after writing.
+dev.off()
 ```
 
 

@@ -50,3 +50,45 @@ plot(df$DateTime, df$Global_active_power,type = "n",xlab="",ylab = "Global Activ
 lines(df$DateTime, df$Global_active_power)
 ```
 
+```{r Plot #3}
+# Plot #3
+
+plot(df$DateTime, df$Sub_metering_1,type = "n",xlab="",ylab = "Energy sub metering")
+lines(df$DateTime, df$Sub_metering_1)
+lines(df$DateTime, df$Sub_metering_2,col="red")
+lines(df$DateTime, df$Sub_metering_3,col="blue")
+legend("topright", legend=c("Sub_metering_1", "Sub_metering_2","Sub_metering_3"),col = c("black","red","blue"),lty=1,cex=0.7)
+```
+
+```{r Plot #4}
+# Plot #4
+
+# Specify a 2x2 plot grid
+par(mfrow=c(2,2))
+
+# plot (1,1)
+
+plot(df$DateTime, df$Global_active_power,type = "n",xlab="",ylab = "Global Active Power (kilowatts)")
+lines(df$DateTime, df$Global_active_power)
+
+# plot (1,2)
+
+plot(df$DateTime, df$Voltage,type = "n",xlab="",ylab = "Voltage")
+lines(df$DateTime, df$Voltage)
+
+# plot (2,1)
+
+plot(df$DateTime, df$Sub_metering_1,type = "n",xlab="",ylab = "Energy sub metering")
+lines(df$DateTime, df$Sub_metering_1)
+lines(df$DateTime, df$Sub_metering_2,col="red")
+lines(df$DateTime, df$Sub_metering_3,col="blue")
+legend("topright", legend=c("Sub_metering_1", "Sub_metering_2","Sub_metering_3"),col = c("black","red","blue"),lty=1,cex=0.3)
+
+# plot (2,2)
+
+plot(df$DateTime, df$Global_reactive_power,type = "n",xlab="",ylab="Global_reactive_power")
+lines(df$DateTime, df$Global_reactive_power)
+
+
+```
+

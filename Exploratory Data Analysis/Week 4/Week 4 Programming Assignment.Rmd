@@ -1,0 +1,60 @@
+---
+title: "Week 4 Programming Assignment"
+author: "Ken Wood"
+date: "8/1/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+
+# Load the raw data files.
+# The first file will likely take a few seconds to load, so please be patient!
+
+NEI <- readRDS("exdata-data-NEI_data/summarySCC_PM25.rds")
+SCC <- readRDS("exdata-data-NEI_data/Source_Classification_Code.rds")
+```
+
+
+# Questions
+
+We will address the following questions and tasks in our exploratory analysis. For each question/task we will need to make a single plot. Unless specified, we can use any plotting system in R to make our plot.
+
+1. Have total emissions from PM2.5 decreased in the United States from 1999 to 2008? Using the **base** plotting system, make a plot showing the *total* PM2.5 emission from all sources for each of the years 1999, 2002, 2005, and 2008.
+
+
+
+```{r}
+
+total_emissions <- aggregate(NEI$Emission, by=list(NEI$year), sum)
+plot(total_emissions,pch=16,xlab="Year",ylab="Emissions (tons)",main="Total Emissions by Year")
+lines(total_emissions$Group.1,total_emissions$x)
+grid(lty="dotted")
+```
+
+2. Have total emissions from PM2.5 decreased in the **Baltimore City, Maryland** (`fips == "24510"`) from 1999 to 2008? Use the base plotting system to make a plot answering this question.
+
+```{r}
+
+# subset NEI for Baltimore City (fips=="24510")
+baltimore_city <- subset(NEI,fips=="24510")
+balt_emissions <- aggregate(baltimore_city$Emission, by=list(baltimore_city$year), sum)
+plot(balt_emissions,pch=16,xlab="Year",ylab="Emissions (tons)",main="Total Emissions by Year: Baltimore-City")
+lines(balt_emissions$Group.1,balt_emissions$x)
+grid(lty="dotted")
+```
+
+
+
+
+3. Of the four types of sources indicated by the `type` (point, nonpoint, onroad, nonroad) variable, which of these four sources have seen decreases in emissions from 1999–2008 for **Baltimore City**? Which have seen increases in emissions from 1999–2008? Use the **ggplot2** plotting system to make a plot answer this question.
+
+4. Across the United States, how have emissions from coal combustion-related sources changed from 1999–2008?
+
+5. How have emissions from motor vehicle sources changed from 1999–2008 in **Baltimore City**?
+
+6. Compare emissions from motor vehicle sources in **Baltimore City** with emissions from motor vehicle sources in **Los Angeles County, California** (`fips == "06037"`). Which city has seen greater changes over time in motor vehicle emissions?
+
+
+

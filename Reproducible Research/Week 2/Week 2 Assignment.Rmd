@@ -68,6 +68,7 @@ library(ggplot2)
 mean_steps <- aggregate(df1$steps, by=list(df1$interval), mean)
 names(mean_steps) <- c("time","steps")
 
+# Plot the line graph
 ggplot(data=mean_steps, aes(x = time, y = steps))+geom_line()+xlab("Time of Day (HHMM)")+ggtitle("Mean Number of Steps by Time of Day")
 
 # Determine time interval when mean number of steps is maximum

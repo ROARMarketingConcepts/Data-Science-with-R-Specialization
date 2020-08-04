@@ -1,0 +1,61 @@
+---
+title: "Week 2 Assignment"
+author: "Ken Wood"
+date: "8/3/2020"
+output: html_document
+---
+
+### Loading and preprocessing the data
+
+Show any code that is needed to
+
+1. Load the data (i.e. `read.csv()`).
+2. Process/transform the data (if necessary) into a format suitable for your analysis.
+
+
+```{r Data Pre-processing}
+echo = TRUE 
+library(chron)
+
+# Read in the data file.
+df <- read.csv("activity.csv")
+
+# Convert 'date' column to datetime variable.
+df$date <- as.Date(df$date,format="%Y-%m-%d")
+
+# Convert 'interval' to a time variable
+df$interval <- times(sub("(.{2})", "\\1:", sprintf("%04d:00", df$interval)))
+```
+
+### What is mean total number of steps taken per day?
+
+For this part of the assignment, we can ignore the missing values in the dataset.
+
+1. Calculate the total number of steps taken per day
+2. If you do not understand the difference between a histogram and a barplot, research the difference between them. Make a histogram of the total number of steps taken each day
+3. Calculate and report the mean and median of the total number of steps taken per day
+
+```{r Calculate total steps per day}
+
+echo = TRUE 
+
+# Drop rows with NA in 'steps' column
+df1 <- df[complete.cases(df),]
+
+# Calculate total steps per day
+total_steps_per_day <- aggregate(df1$steps, by=list(df1$date), sum)
+
+# Generate histogram
+hist(total_steps_per_day$x,breaks=20,col="blue",xlab="Total Steps Per Day",main="Histogram of Total Steps Per Day")
+
+# Calculate and report the mean and median of the total number of steps taken per day
+
+mean <- mean(total_steps_per_day$x)
+median <- median(total_steps_per_day$x)
+paste0("Mean Total Steps per Day: ",round(mean,2))
+paste0("Median Total Steps per Day: ",round(median,2))
+```
+### What is the average daily activity pattern?
+
+1. Make a time series plot (i.e. `type = "l"`) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?

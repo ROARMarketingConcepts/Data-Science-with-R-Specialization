@@ -24,7 +24,7 @@ df <- read.csv("activity.csv")
 df$date <- as.Date(df$date,format="%Y-%m-%d")
 
 # Convert 'interval' to a time variable
-df$interval <- times(sub("(.{2})", "\\1:", sprintf("%04d:00", df$interval)))
+# df$interval <- times(sub("(.{2})", "\\1:", sprintf("%04d:00", df$interval)))
 ```
 
 ### What is mean total number of steps taken per day?
@@ -59,3 +59,19 @@ paste0("Median Total Steps per Day: ",round(median,2))
 
 1. Make a time series plot (i.e. `type = "l"`) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+```{r}
+echo = TRUE
+library(ggplot2)
+
+# Calculate mean number of steps for each time period
+mean_steps <- aggregate(df1$steps, by=list(df1$interval), mean)
+names(mean_steps) <- c("time","steps")
+
+ggplot(data=mean_steps, aes(x = time, y = steps))+geom_line()+xlab("Time of Day (HHMM)")+ggtitle("Mean Number of Steps by Time of Day")
+
+# Determine time interval when mean number of steps is maximum
+mean_steps[which.max(mean_steps$steps), ]$time
+
+```
+

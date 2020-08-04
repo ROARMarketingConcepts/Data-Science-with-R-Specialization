@@ -1,5 +1,5 @@
 ---
-title: "Week 2 Assignment"
+title: "Reproducible Research in R: Week 2 Assignment"
 author: "Ken Wood"
 date: "8/3/2020"
 output: html_document
@@ -75,4 +75,58 @@ ggplot(data=mean_steps, aes(x = time, y = steps))+geom_line()+xlab("Time of Day 
 mean_steps[which.max(mean_steps$steps), ]$time
 
 ```
+### Imputing missing values
 
+Note that there are a number of days/intervals where there are missing values (coded as `NA`). The presence of missing days may introduce bias into some calculations or summaries of the data.
+
+1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with `NA`s).
+
+2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+```{r}
+echo = TRUE
+# Calculate the number of rows with NAs
+sum(!complete.cases(df))
+```
+
+```{r}
+library(dplyr)
+
+# Get rows in df where NAs are present
+na_rows <- df[!complete.cases(df),]
+
+# Rename columns
+names(na_rows) <- c("steps","date","time")
+
+# Impute mean number of steps for each time interval
+na_rows <- merge(na_rows,mean_steps, by=c("time"))
+
+# 'df1' is the original dataset with the NA rows deleted. We need to combine 'na_rows' with 'df1'. However, we need to clean up 'na_rows' a bit...
+
+na_rows = subset(na_rows, select = -c(steps.x) )
+names(na_rows) <- c("interval","date","steps")
+
+# Combine 'df1' and 'na_rows'
+df1 <- union(df1,na_rows)
+
+# Sort 'df1' by date and then by interval
+df1 <- df1 %>% arrange(date, interval)
+
+# Calculate total steps per day
+total_steps_per_day <- aggregate(df1$steps, by=list(df1$date), sum)
+
+# Generate histogram
+hist(total_steps_per_day$x,breaks=20,col="blue",xlab="Total Steps Per Day",main="Histogram of Total Steps Per Day")
+
+# Calculate and report the mean and median of the total number of steps taken per day
+
+mean <- mean(total_steps_per_day$x)
+median <- median(total_steps_per_day$x)
+paste0("Mean Total Steps per Day: ",round(mean,2))
+paste0("Median Total Steps per Day: ",round(median,2))
+```
+As we can see, imputing the mean value of the total number of steps at each time interval for missing values has very little effect on the histogram or the overall mean and median values.

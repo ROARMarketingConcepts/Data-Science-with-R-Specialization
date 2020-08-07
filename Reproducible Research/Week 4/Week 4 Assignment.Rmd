@@ -5,69 +5,100 @@ date: "8/5/2020"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 ### Questions we will be answering in this analysis:
 
 1. Across the United States, which types of events (as indicated in the 
 `EVTYPE` variable) are most harmful with respect to population health?
 
-2. Across the United States, which types of events have the greatest economic consequences?
-
 ```{r}
-knitr::opts_chunk$set(echo = TRUE)
+echo = TRUE
+
+# To clean up the memory of your current R session run the following line
+rm(list=ls(all=TRUE))
 
 # Load the raw dataset
 df <- read.csv("repdata-data-StormData.csv")
 ```
 
 ```{r}
-knitr::opts_chunk$set(echo = TRUE)
+echo = TRUE
 
 # Let's look at a few rows of the df...
 head(df)
 ```
 
 ```{r}
-knitr::opts_chunk$set(echo = TRUE)
+echo = TRUE
 
-# How big is the df?  
-dim(df)
+library(dplyr)
 
-# Wow...almost 29 million rows!
+# Add numbers in 'FATALITIES' and 'INJURIES' columns
+df$CASUALTIES <- df$FATALITIES+df$INJURIES
+
+# Let's sort the df by 'CASUALTIES' descending
+df <- df %>% arrange(-CASUALTIES)
 ```
 
 ```{r}
-knitr::opts_chunk$set(echo = TRUE)
 
-# Let's sort the df by fatalities and then by injuries
-df <- df[order(c(-df$FATALITIES,-df$INJURIES)),]
+echo = TRUE
+
+# Aggregate the casualties by event type
+casualties_per_event <- aggregate(df$CASUALTIES, by=list(df$EVTYPE), sum)
+names(casualties_per_event) <- c("EVTYPE", "TOTAL_CASUALTIES")
+casualties_per_event <- casualties_per_event %>% arrange(-TOTAL_CASUALTIES)
+
+# Filter for events where the total casualities is greater than 1000
+casualties_per_event <- casualties_per_event[casualties_per_event$TOTAL_CASUALTIES >= 1000,]
+```
+
+```{r fig.width=10,fig.height=25}
+
+# Plot a column chart of Total Casualties vs. Event Type
+
+library(ggplot2)
+
+png("total_casualties_by_event_type.png")
+
+ggplot(data=casualties_per_event, aes(x = reorder(EVTYPE, -TOTAL_CASUALTIES), y = TOTAL_CASUALTIES)) + geom_bar(position="dodge",stat="identity",color="blue") + xlab("Event Type") + ylab("Total Casualities") + theme(axis.text.x = element_text(angle = 270,size=10,vjust=0.5,color="blue"), axis.text.y = element_text(size=10,color="blue"),plot.title = element_text(size = 25, face = "bold")) + ggtitle("Total Casualties by Event Type") + geom_text(aes(label=TOTAL_CASUALTIES), position=position_dodge(width=0.5), size=3, vjust=-2)
+
+dev.off()
+```
+
+2. Across the United States, which types of events have the greatest economic consequences?
+
+```{r}
+echo = TRUE
+
+library(dplyr)
+
+# Recode all multipliers for the 'PROPDMG' column
+
+df <- df %>% mutate(PROPDMGMULT = case_when(PROPDMGEXP == "K" ~ 1E3,PROPDMGEXP == "k" ~ 1E3,PROPDMGEXP == "M" ~ 1E6, PROPDMGEXP == "m" ~ 1E6,PROPDMGEXP == "B" ~ 1E9,PROPDMGEXP == "b" ~ 1E9, PROPDMGEXP == "" ~ 1, TRUE ~ 10))
+
+# Recode all multipliers for the 'CROPDMG' column
+
+df <- df %>% mutate(CROPDMGMULT = case_when(CROPDMGEXP == "K" ~ 1E3,CROPDMGEXP == "k" ~ 1E3,CROPDMGEXP == "M" ~ 1E6, CROPDMGEXP == "m" ~ 1E6,CROPDMGEXP == "B" ~ 1E9,CROPDMGEXP == "b" ~ 1E9, CROPDMGEXP == "" ~ 1,TRUE ~ 10))
+
+# Calculate amount of total damage
+
+df$TOTAL_DAMAGE <- df$PROPDMG*df$PROPDMGMULT + df$CROPDMG*df$CROPDMGMULT
 ```
 
 ```{r}
-knitr::opts_chunk$set(echo = TRUE)
 
-# Delete rows where NAs are in the columns
-# harmful_to_health <- df[!with(df,is.na(df$FATALITIES) & is.na(df$INJURIES)),]
-df$HARM_TOTAL <- df$FATALITIES+df$INJURIES
-harmful_to_health <- df[!is.na(c(df$FATALITIES,df$INJURIES)), ]
-```
+# Aggregate the total damage by event type
+total_damage_per_event <- aggregate(df$TOTAL_DAMAGE, by=list(df$EVTYPE), sum)
+names(total_damage_per_event) <- c("EVTYPE", "TOTAL_DAMAGE")
 
-```{r}
-knitr::opts_chunk$set(echo = TRUE)
+# The total damage numbers are big, so divide by 1E9 to get numbers in $B.
+total_damage_per_event$TOTAL_DAMAGE <- round(total_damage_per_event$TOTAL_DAMAGE/1E9,2)
 
-# What are the different event types in the df?
-events <- as.data.frame(table(df$EVTYPE))
-names(events) <- c("EVTYPE","Freq")
-events <- events[order(-events$Freq),] 
-```
+total_damage_per_event <- total_damage_per_event %>% arrange(-TOTAL_DAMAGE)
 
-```{r}
-# To make our analysis manageable, let's remove those events in the df with < 10 occurrences
-# events <- events[events$Freq >= 10,]
+# Filter for events where the total damage is greater than $5B
+total_damage_per_event <- total_damage_per_event[total_damage_per_event$TOTAL_DAMAGE >= 5,]
 
-# Drop the 'Freq' column...
-# events$Freq <- NULL
+names(total_damage_per_event) <- c("EVTYPE", "TOTAL_DAMAGE ($B)")
 ```
 

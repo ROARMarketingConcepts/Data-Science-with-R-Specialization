@@ -1,0 +1,81 @@
+---
+title: "Statistical Inference Course Project - Part 2"
+author: "Ken Wood"
+date: "8/19/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+### Introduction
+
+For the second portion of the course project, we're going to analyze the ToothGrowth data in the R datasets package. Specifically, we will:
+
+1. Load the ToothGrowth data and perform some basic exploratory data analyses.
+2. Provide a basic summary of the data.
+3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (we will only use the techniques covered in the course, even if there are other approaches worth considering).
+4. State your conclusions and the assumptions needed for your conclusions.
+
+**Load the data and perform some basic analyses...**
+```{r}
+tg <- ToothGrowth
+str(tg)
+names(tg) <- c("length","Supplement","dose")
+unique(tg$dose)  # get list of unique values of 'dose'
+```
+
+### Plots of the Data
+
+**Create a scatter plot of the data in 'ToothGrowth'...**
+```{r}
+library(ggplot2)
+
+data_plot <- ggplot(aes(x=dose, y = length), data = tg) + 
+        geom_point(aes(color = Supplement)) + xlab("Supplement Dose") + ylab("Tooth length") + ggtitle("Scatterplot of ToothGrowth Data") + theme(plot.title = element_text(face="bold",hjust = 0.5))
+print(data_plot)
+```
+
+**Create boxplots to show the relationships between the variables...**
+```{r}
+box_plt <- ggplot(aes(x = factor(dose), y = length), data = tg) + 
+        geom_boxplot(aes(fill = factor(dose))) + facet_wrap(~Supplement,ncol=2) + xlab("Dose") + ylab("Tooth length") + ggtitle("Tooth Length vs. Supplement Dose by Supplement") + labs(fill="Supplement Dose") + theme(plot.title = element_text(face="bold",hjust = 0.5))
+print(box_plt)
+```
+
+```{r}
+box_plt <- ggplot(aes(x = factor(Supplement), y = length), data = tg) + 
+        geom_boxplot(aes(fill = factor(Supplement))) + facet_wrap(~dose,ncol=3) + xlab("Supplement") + ylab("Tooth length") + ggtitle("Tooth Length vs. Supplement by Supplement Dose") + labs(fill="Supplement Type") + theme(plot.title = element_text(face="bold",hjust = 0.5))
+print(box_plt)
+```
+
+### T-Tests and Confidence Intervals
+
+Now we will compare tooth growth by supplement doses using a series of t-tests. Our hypotheses for each dose level are as follows:
+
+* $H_0:$ there is no difference in the mean tooth growth length between the supplements VC and OJ
+* $H_a:$ there is a statistically significant difference in the mean tooth growth length between the supplements VC and OJ
+
+**Dose = 0.5**
+```{r}
+t.test(length~Supplement,data=tg[tg$dose==0.5,])
+```
+
+The p-value of this test is 0.006. Since the p-value < 0.05 and the confidence interval of the test does not contain a mean difference = 0, we can say that, when compared to each other, the two supplement types (at a dose of 0.5) seem to have an impact on toothgrowth length based on this test. In other words, we reject $H_0$.
+
+**Dose = 1.0**
+```{r}
+t.test(length~Supplement,data=tg[tg$dose==1.0,])
+```
+
+The p-value of this test is 0.001. Since the p-value < 0.05 and the confidence interval of the test does not contain a mean difference = 0, we can say that, when compared to each other, the two supplement types (at a dose of 1.0) seem to have an impact on toothgrowth length based on this test. In other words, we reject $H_0$.
+
+
+**Dose = 2.0**
+```{r}
+t.test(length~Supplement,data=tg[tg$dose==2.0,])
+```
+
+The p-value of this test is 0.96. Since the p-value > 0.05 and the confidence interval of the test contains a mean difference = 0, we can say that, when compared to each other, the two supplement types (at a dose of 2.0) do not have an impact on toothgrowth length based on this test. In other words, we fail to reject $H_0$.
+
+### Conclusion
+
+Based on the above analysis, if the supplement OJ or VC were to be independently and identically administered among a population of guinea pigs, we can conclude that OJ, when administered in a moderate dosage (< 2.0), would have a significant impact on the tooth growth.

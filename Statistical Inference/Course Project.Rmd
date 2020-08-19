@@ -1,0 +1,36 @@
+---
+title: "Statistical Inference - Course Project"
+author: "Ken Wood"
+date: "8/17/2020"
+output: html_document
+---
+
+In this project we will investigate the exponential distribution in R and compare it with the Central Limit Theorem. The exponential distribution can be simulated in R with the expression `rexp(n, lambda)` where `lambda` is the rate parameter. The mean of the exponential distribution is `1/lambda` and the standard deviation is also `1/lambda`. We will set $\lambda$ = 0.2 for all of the simulations. We will investigate the` distribution of averages of 40 exponentials. Note that we will need to do a thousand simulations.
+
+Our goal is to illustrate via simulation and associated explanatory text the properties of the distribution of the mean of 40 exponentials. We will: 
+
+1. Show the sample mean and compare it to the theoretical mean of the distribution.
+2. Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
+3. Show that the distribution is approximately normal.
+
+In deliverable 3, we will focus on the difference between the distribution of a large collection of random exponentials and the distribution of a large collection of averages of 40 exponentials.
+
+First, let's plot the exponential distribution for 1000 observations using $\lambda$ = 0.2. The theoretical mean and standard deviation for this distribution are $\mu$ and $\sigma$, respectively and are both equal to 1/$\lambda$ = 5.
+
+If we simulate 1000 observations of the exponential distribution using the `rexp` function in R, we get the following histogram with sample mean and standard deviation values very close to 5.
+
+```{r}
+exp_dist <- rexp(1000,rate = 0.2)
+hist(exp_dist,breaks=20,col="blue",xlab = "x",main="Histogram of an Exponential Distribution - 1000 Observations")
+mean(exp_dist)
+sd(exp_dist)
+```
+
+```{r}
+mnsexp = NULL
+for (i in 1 : 1000) mnsexp = c(mnsexp, mean(rexp(40,rate=0.2)))
+hist(mnsexp)
+mean(mnsexp)
+sd(mnsexp)
+```
+Recall that the mean and standard deviation for an exponential distribution = `1/lambda`. If we select `lambda = 0.2`, then the mean $\mu$ and standard deviation $\sigma$ is 5.

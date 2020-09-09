@@ -1,0 +1,118 @@
+---
+title: "Regression Models in R"
+author: "Ken Wood"
+date: "9/9/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Executive Summary
+
+Motor Trend, a magazine about the automobile industry, wants to look at a data set of a collection of cars to learn more about mileage. They are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). Specifically, they are interested in answering the following two questions:
+
+* “Is an automatic or manual transmission better for MPG?”
+* "How do we quantify the MPG difference between automatic and manual transmissions?"
+
+
+#### Load the 'mtcars' dataset and look at the first few rows...
+
+```{r}
+data(mtcars)
+head(mtcars)
+```
+#### Variables in the 'mtcars' dataset...
+
+* **mpg:**	Miles/(US) gallon
+* **cyl:**	Number of cylinders
+* **disp:**	Displacement (cu.in.)
+* **hp:**	Gross horsepower
+* **drat:**	Rear axle ratio
+* **wt:**	Weight (1000 lbs)
+* **qsec:**	1/4 mile time
+* **vs:**	Engine (0 = V-shaped, 1 = straight)
+* **am:**	Transmission (0 = automatic, 1 = manual)
+* **gear:**	Number of forward gears
+* **carb:**	Number of carburetors
+
+#### Question 1: “Is an automatic or manual transmission better for MPG?”
+
+First, let's genereate a xox plot of MPG vs. transmission type...
+```{r}
+library(ggplot2)
+ggplot(mtcars, aes(x=factor(am), group=am, y=mpg)) + geom_boxplot() + scale_x_discrete(labels=c("0" = "Automatic", "1" = "Manual")) + xlab("Transmission Type") + ylab("MPG") + ggtitle("MPG By Transmission Type") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+We can perform a t-test on the mean MPG numbers for cars with automatic vs. cars with manual transmissions.  Our hypotheses will be as follows:
+
+* $H_0$: $\mu_m$ - $\mu_a$ $= 0$
+* $H_a$: $\mu_m$ - $\mu_a$ $\neq 0$
+
+where $\mu_m$ and $\mu_a$ are the mean MPGs for manual and automatic transmissions, respectively.
+
+We need to separate the MPG numbers according to automatic vs. manual transmission. 
+
+```{r}
+manual <- mtcars[mtcars$am == 1,]     # get rows with manual transmission
+automatic <- mtcars[mtcars$am == 0,]  # get rows with automatic transmission
+manual <- manual[,"mpg"]
+automatic <- automatic[,"mpg"]
+row.names(manual) <- NULL             # remove row index
+row.names(automatic) <- NULL 
+head(manual)
+head(automatic)
+```
+We can now perform a t-test between 'manual' and 'automatic'.
+
+```{r}
+result <- t.test(manual,automatic)
+result
+```
+Our test result shows that we should reject $H_0$ with a p-value very close to $0$. The difference in the MPG means between manual and automatic transmissions is statistically significant at a 95% confidence level. Moreover, the mean MPG for manual transmissions $(x)$ is significantly higher than the mean MPG for automatic transmissions $(y)$.
+
+#### Question 2: "How do we quantify the MPG difference between automatic and manual transmissions?"
+
+We start by performing a linear regression with 'mpg' as the dependent variable and the rest of the columns in 'mtcars' as the independent variables.
+
+```{r}
+fit <- lm(mpg~.,data=mtcars)
+summary(fit)
+```
+
+We see that the p-values for all of the variable coefficients are > 0.05, therefore, we cannot draw any conclusions about the statistical significance of the coefficients. To find out which independent variables are statistically significant, we will make use of R's 'step' function.
+
+```{r}
+# run 'step' analysis with direction = "backward"
+step_analysis <- step(fit,trace=FALSE)  # suppress output 
+summary(step_analysis)      
+```
+Our step analysis results indicate that the coefficients for 'wt', 'qsec', and 'am' are statistically significant (p=values < 0.05) and our linear model comprised of these variables has a $R^2$ $= 0.85$, which means the model can account for about 85% of the variance in 'mpg'.
+
+Let's generate residual plots for the simplified linear model obtained by the 'step' analysis:
+
+```{r}
+layout(matrix(c(1,2,3,4),2,2))      # display the plot area
+plot(step_analysis)
+```
+
+We can draw the following conclusions from the residual plots:
+
+1. The Residuals vs. Fitted plot shows no pattern consistency, thus we can conclude that the variables in our model are indeed independent.
+2. The Normal Q-Q plot shows points lying very close to the line which indicates that the residuals are normally distributed.
+3. The Scale-Location plot confirms our assumption of constant variance within the model, as the points are randomly distributed.
+4. The values in the Residuals vs. Leverage plot all fall well within the 0.5 bands, which reveals that no outliers are present.
+
+### Conclusions
+
+Therefore, we can safely adopt this model to provide an answer to Question #2. 
+
+* Using the final model output by the 'step' function, we see that the multiple $R^2$ value is sufficiently high at 0.85. 
+* We also see that 'wt' and 'qsec' are confounding variables in the relationship between ‘mpg' and ’am'. 
+* The model predicts that cars with manual transmission will provide, on average, an additional 2.94 MPG compared to cars with automatic transmission.
+
+
+

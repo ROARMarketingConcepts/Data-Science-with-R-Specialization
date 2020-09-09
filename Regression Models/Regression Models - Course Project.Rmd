@@ -41,7 +41,7 @@ head(mtcars)
 
 #### Question 1: “Is an automatic or manual transmission better for MPG?”
 
-First, let's genereate a xox plot of MPG vs. transmission type...
+First, let's generate a box plot of MPG vs. transmission type...
 ```{r}
 library(ggplot2)
 ggplot(mtcars, aes(x=factor(am), group=am, y=mpg)) + geom_boxplot() + scale_x_discrete(labels=c("0" = "Automatic", "1" = "Manual")) + xlab("Transmission Type") + ylab("MPG") + ggtitle("MPG By Transmission Type") + theme(plot.title = element_text(hjust = 0.5))

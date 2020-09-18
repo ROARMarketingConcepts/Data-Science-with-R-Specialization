@@ -1,0 +1,122 @@
+---
+title: "Practical Machine Learning - Week 2 Quiz"
+author: "Ken Wood"
+date: "9/16/2020"
+output: html_document
+---
+
+#### Question 1
+```{r}
+library(caret)
+library(AppliedPredictiveModeling)
+data(AlzheimerDisease)
+```
+
+What are the set of commands that will create non-overlapping training and test sets with about 50% of the observations assigned to each?
+
+```{r}
+adData = data.frame(diagnosis,predictors)
+trainIndex = createDataPartition(diagnosis, p = 0.50,list=FALSE)
+training = adData[trainIndex,]
+testing = adData[-trainIndex,]
+```
+
+#### Question 2
+```{r}
+library(AppliedPredictiveModeling)
+data(concrete)
+set.seed(1000)
+inTrain = createDataPartition(mixtures$CompressiveStrength, p = 3/4)[[1]]
+training = mixtures[ inTrain,]
+testing = mixtures[-inTrain,]
+```
+
+```{r}
+library(Hmisc)
+training$cp <- cut2(training$CompressiveStrength)
+qplot(seq_along(training$cp), training$cp, color = training$cp)
+```
+
+Answer: There is a non-random pattern in the plot of the outcome versus index that does not appear to be perfectly explained by any predictor suggesting a variable may be missing.
+
+#### Question 3
+
+```{r}
+library(AppliedPredictiveModeling)
+data(concrete)
+library(caret)
+set.seed(1000)
+inTrain = createDataPartition(mixtures$CompressiveStrength, p = 3/4)[[1]]
+training = mixtures[ inTrain,]
+testing = mixtures[-inTrain,]
+```
+
+Make a histogram and confirm the SuperPlasticizer variable is skewed. Normally you might use the log transform to try to make the data more symmetric. Why would that be a poor choice for this variable?
+
+```{r}
+hist(training$Superplasticizer)
+```
+```{r}
+hist(log(training$Superplasticizer))
+```
+There are 288 zero values in Superplasticizer. So we cannot apply a log transform to it. 
+
+Answer: There are values of zero so when you take the log() transform those values will be -Inf.
+
+#### Question 4
+```{r}
+set.seed(3433)
+data(AlzheimerDisease)
+adData = data.frame(diagnosis,predictors)
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+training = adData[ inTrain,]
+testing = adData[-inTrain,]
+```
+
+Find all the predictor variables in the training set that begin with IL. Perform principal components on these variables with the preProcess() function from the caret package. Calculate the number of principal components needed to capture 90% of the variance. How many are there?
+
+```{r}
+library(dplyr)
+df <- training %>% dplyr:: select(starts_with("IL"))
+result <- preProcess(df,method = 'pca', thresh = 0.9)
+result$numComp
+```
+
+#### Question 5
+```{r}
+library(caret)
+library(AppliedPredictiveModeling)
+set.seed(3433)
+data(AlzheimerDisease)
+adData = data.frame(diagnosis,predictors)
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+training = adData[ inTrain,]
+testing = adData[-inTrain,]
+```
+
+Create a training data set consisting of only the predictors with variable names beginning with IL and the diagnosis. Build two predictive models, one using the predictors as they are and one using PCA with principal components explaining 80% of the variance in the predictors. Use method=“glm” in the train function.
+
+What is the accuracy of each method in the test set? Which is more accurate?
+
+```{r}
+set.seed(3433)
+trainingIL <- training[,grep("^IL|diagnosis", names(training))]
+testingIL <- testing[,grep("^IL|diagnosis", names(testing))]
+```
+Non-PCA fit...
+```{r}
+set.seed(3433)
+fit <- train(diagnosis~., data=trainingIL, method="glm")
+pred <- predict(fit, testingIL)
+cm <- confusionMatrix(pred,testingIL$diagnosis)
+cm
+```
+
+PCA fit
+```{r}
+fitPC <- train(diagnosis~., method="glm", data=trainingIL, preProcess="pca", trControl = trainControl(preProcOptions = list(thresh = 0.8)))
+predPC <- predict(fitPC, testingIL)
+cmPCA <- confusionMatrix(predPC, testingIL$diagnosis)
+cmPCA
+```
+

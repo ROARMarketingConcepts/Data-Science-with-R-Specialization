@@ -1,0 +1,168 @@
+---
+title: "Practical Machine Learning - Week 4 Quiz"
+author: "Ken Wood"
+date: "9/18/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+Clear out all previous R sessions...
+```{r}
+rm(list = ls())
+```
+
+#### Question 1
+
+Load the vowel.train and vowel.test data sets:
+```{r}
+library(caret)
+library(gbm)
+library(ElemStatLearn)
+data(vowel.train)
+data(vowel.test)
+```
+
+Set the variable y to be a factor variable in both the training and test set. Then set the seed to 33833. Fit (1) a random forest predictor relating the factor variable y to the remaining variables and (2) a boosted predictor using the "gbm" method. Fit these both with the train() command in the caret package.
+
+What are the accuracies for the two approaches on the test data set? What is the accuracy among the test set samples where the two methods agree?
+
+```{r}
+vowel.train$y <- as.factor(vowel.train$y)
+vowel.test$y <- as.factor(vowel.test$y)
+set.seed(33833)
+mod_rf <- train(y ~ ., method = "rf", data = vowel.train)
+mod_gbm <- train(y ~ ., method = "gbm", data = vowel.train,verbose=FALSE)
+pred_rf <- predict(mod_rf, vowel.test)
+pred_gbm <- predict(mod_gbm, vowel.test)
+```
+Get accuracy of Random Forest model...
+```{r}
+confusionMatrix(pred_rf, vowel.test$y)$overall[1]
+```
+Get accuracy of Boost model...
+```{r}
+confusionMatrix(pred_gbm, vowel.test$y)$overall[1]
+```
+Create dataframe of rf & gbm predictions along with true y_test values.
+
+```{r}
+predDF <- data.frame(pred_rf, pred_gbm, y = vowel.test$y)
+```
+
+Calculate accuracy among the test set samples where the two methods agree.
+```{r}
+sum(pred_rf[predDF$pred_rf == predDF$pred_gbm] == 
+        predDF$y[predDF$pred_rf == predDF$pred_gbm]) / 
+  sum(predDF$pred_rf == predDF$pred_gbm)
+```
+#### Question 2
+
+Load the Alzheimer's data using the following commands:
+```{r}
+library(caret)
+library(gbm)
+set.seed(3433)
+library(AppliedPredictiveModeling)
+data(AlzheimerDisease)
+adData = data.frame(diagnosis, predictors)
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+training = adData[inTrain, ]
+testing = adData[-inTrain, ]
+```
+
+Set the seed to 62433 and predict diagnosis with all the other variables using a random forest ("rf"), boosted trees ("gbm") and linear discriminant analysis ("lda") model. 
+
+Stack the predictions together using random forests ("rf"). What is the resulting accuracy on the test set? Is it better or worse than each of the individual predictions?
+
+```{r}
+set.seed(62433)
+mod_rf <- train(diagnosis ~ ., method = "rf",data = training)
+mod_gbm <- train(diagnosis ~ .,  method = "gbm",data = training, verbose=FALSE)
+mod_lda <- train(diagnosis ~ ., method = "lda", data = training,verbose=FALSE)
+pred_rf <- predict(mod_rf, testing)
+pred_gbm <- predict(mod_gbm, testing)
+pred_lda <- predict(mod_lda, testing)
+predDF <- data.frame(pred_rf, pred_gbm, pred_lda, diagnosis = testing$diagnosis)
+```
+
+Accuracy of RF
+```{r}
+confusionMatrix(pred_rf, testing$diagnosis)$overall[1]
+```
+Accuracy of GBM
+```{r}
+confusionMatrix(pred_gbm, testing$diagnosis)$overall[1]
+```
+
+Accuracy of LDA
+```{r}
+confusionMatrix(pred_lda, testing$diagnosis)$overall[1]
+```
+
+```{r}
+combModFit <- train(diagnosis ~ ., method = "rf", data = predDF)
+combPred <- predict(combModFit, predDF)
+confusionMatrix(combPred,testing$diagnosis)$overall[1]
+```
+
+#### Question 3
+```{r}
+set.seed(3523)
+library(AppliedPredictiveModeling)
+library(elasticnet)
+data(concrete)
+inTrain = createDataPartition(concrete$CompressiveStrength, p = 3/4)[[1]]
+training = concrete[ inTrain,]
+testing = concrete[-inTrain,]
+```
+
+Set the seed to 233 and fit a lasso model to predict Compressive Strength. Which variable is the last coefficient to be set to zero as the penalty increases? (Hint: it may be useful to look up ?plot.enet).
+
+```{r}
+set.seed(233)
+mod_lasso <- train(CompressiveStrength~.,method="lasso",data=concrete)
+plot.enet(mod_lasso$finalModel,xvar="penalty",use.color=TRUE)
+```
+
+The coefficient path shows that the variable Cement is the last coefficient to be set to zero as the penalty increases.
+
+#### Question 4
+
+Load the data on the number of visitors to the instructors blog from here:
+
+https://d396qusza40orc.cloudfront.net/predmachlearn/gaData.csv
+
+```{r}
+library(lubridate) # For year() function below
+dat = read.csv("~/Desktop/gaData.csv")
+training = dat[year(dat$date) < 2012,]
+testing = dat[(year(dat$date)) > 2011,]
+tstrain = ts(training$visitsTumblr)
+```
+
+```{r}
+library(forecast)
+mod_ts <- bats(tstrain)
+fcast <- forecast(mod_ts, level = 95, h = dim(testing)[1])
+sum(fcast$lower < testing$visitsTumblr & testing$visitsTumblr < fcast$upper) / dim(testing)[1]
+```
+
+#### Question 5
+
+Load the concrete data with the commands:
+```{r}
+set.seed(3523)
+library(AppliedPredictiveModeling)
+data(concrete)
+inTrain = createDataPartition(concrete$CompressiveStrength, p = 3/4)[[1]]
+training = concrete[ inTrain,]
+testing = concrete[-inTrain,]
+```
+Set the seed to 325 and fit a support vector machine using the e1071 package to predict Compressive Strength using the default settings. Predict on the testing set. What is the RMSE?
+```{r}
+set.seed(325)
+library(e1071)
+model_svm <- svm(CompressiveStrength ~ ., data=training)
+pred_svm <- predict(model_svm,testing)
+accuracy(pred_svm, testing$CompressiveStrength)
+```

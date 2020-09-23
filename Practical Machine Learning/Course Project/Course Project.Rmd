@@ -1,13 +1,18 @@
 ---
 title: "Practical Machine Learning in R - Course Project"
 author: "Ken Wood"
-date: "9/22/2020"
-output: html_document
+date: "9/23/2020"
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 #### Background
 
-Using devices such as *Jawbone Up, Nike FuelBand,* and *Fitbit* it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, our goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. The participants were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+Using devices such as *Jawbone Up, Nike FuelBand,* and *Fitbit* it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, our goal will be to use data from accelerometers on the belt, forearm, arm, and dumbbell of 6 participants. The participants were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+```{r}
+
+```
 
 The goal of this project is to predict the manner in which they did the exercise. This is the `classe` variable in the training set. We may use any of the other variables to predict with. You should create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. You will also use your prediction model to predict 20 different test cases.
 
@@ -50,27 +55,28 @@ y_training <- training$classe
 y_cross_val <- cross_val$classe
 
 # Strip out categorical variables and `classe` from 'training' and 'cross_val' datasets
-training <- training[-c(1:6,60)]
-cross_val <- cross_val[-c(1:6,60)]
+X_train <- training[-c(1:6,60)]
+X_cv <- cross_val[-c(1:6,60)]
 ```
 
 Now, let's look at the correlation values among the predictors...
 ```{r}
-M <- abs(cor(training))
+M <- abs(cor(X_train))
 diag(M) <- 0
 which(M>0.8,arr.ind = TRUE)
 ```
-We see that many of the columns are highly correlated with each other. Let's train a PCA model with 2 principle components:
+
+We see that many of the columns are highly correlated with each other. Let's train a PCA model with 2 principal components:
 
 ```{r}
-preProc <- preProcess(training,method="pca",pcaComp=2)
-pred_training <- predict(preProc,training)
+preProc <- preProcess(X_train,method="pca",pcaComp=2)
+pred_training <- predict(preProc,X_train)
 plot(pred_training[,1],pred_training[,2])
 ```
 
 We see from the plot of the two principal components that there are 5 relatively distinct groupings that correspond to the different values of the `classe` variable.
 ```{r}
-# Add `classe` vector to the principle component predictors...
+# Add `classe` vector to the principal component predictors...
 training_pca <- cbind(pred_training,y_training)
 # Rename `training$classe` column to `classe`
 names(training_pca)[names(training_pca) == 'y_training'] <- 'classe'
@@ -83,20 +89,21 @@ modelFit <- train(classe~.,method="rf",data=training_pca)
 
 #### Cross-Validation Dataset Accuracy
 
-First, let's determine the principle component predictions for the cross-validation dataset based on our preprocessing parameters for the training dataset.
+First, let's determine the principal component predictions for the cross-validation dataset based on our preprocessing parameters for the training dataset.
 
 ```{r}
-pred_cross_val <- predict(preProc,cross_val)
+pred_cross_val <- predict(preProc,X_cv)
 plot(pred_cross_val[,1],pred_cross_val[,2])
 ```
 
 Let's generate a confusion matrix for the cross-validation predictions for `classe` vs. the actual values.
-
 ```{r}
 confusionMatrix(y_cross_val,predict(modelFit,pred_cross_val))
 ```
 
-Now, let's test the model with the test data. We need to recall what columns of the training dataset we kept so that the columns of the test dataset are identical.
+**Wow, we have an cross-validation accuracy of 1!  This means that the Random Forest algorithm is likely overfitting the data.**
+
+Anyway, let's go ahead and test this RF model with the test data. We need to recall what columns of the training dataset we kept so that the columns of the test dataset are identical.
 
 ```{r}
 # Remove columns with >=1 'NA' value
@@ -105,5 +112,50 @@ testing_modified <- testing[ , colSums(is.na(testing)) < 1]
 testing_modified <- testing_modified[-c(1:6,60)]
 ```
 
+Generate principal components on the test set using the preProc method we developed for the training set.
 
+```{r}
+testing_pca <- predict(preProc,testing_modified)
+plot(testing_pca[,1],testing_pca[,2])
+```
 
+Make predictions on `classe` based on `modelFit`:
+```{r}
+testing_classe_pred <- predict(modelFit,testing_pca)
+testing_classe_pred
+```
+
+This set of predictions give us an accuracy of 0.55. Therefore, we conclude that we are overfitting.
+
+#### Pre-processing using K-folds cross-validation.
+
+Define the training control for the K-fold validation using K=3 folds.
+```{r}
+set.seed(123) 
+train.control <- trainControl(method = "cv", number = 3, verboseIter=FALSE)
+training <- training[-c(1:6)]
+```
+
+Train the model...
+```{r}
+modelFit2 <- train(classe ~., data = training, method = "rf",
+               trControl = train.control)
+```
+
+For this model, the accuracy numbers are consistently 0.99 for all three folds.
+```{r}
+modelFit2
+```
+
+Let's look at the confusion matrix for the cross validation dataset.
+```{r}
+confusionMatrix(y_cross_val,predict(modelFit2,X_cv))
+```
+
+Now, we generate predictions on `classe` based on `modelFit2`:
+```{r}
+testing_classe_pred <- predict(modelFit2,testing_modified)
+testing_classe_pred
+```
+
+**We find that these predictions give us a 100% score on the Prediction Quiz.**

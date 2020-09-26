@@ -1,0 +1,29 @@
+---
+title: "Developing Data Products - Week 2 Project"
+author: "Ken Wood"
+date: "9/26/2020"
+output: html_document
+---
+
+## Places Where I Have Lived
+
+Use a picture of me as the icon for each location...
+```{r, echo=FALSE}
+library(leaflet)
+KenPic <- makeIcon(
+  iconUrl = "KenPic.jpeg",
+  iconWidth = 31*215/230, iconHeight = 31,
+  iconAnchorX = 31*215/230/2, iconAnchorY = 16
+)
+```
+
+
+```{r}
+KenLatLong <- data.frame(
+  lat = c(41.766667,41.716667,40.441944,42.295833,42.134064,42.083333,35.766667),
+  lng = c(-71.45,-71.416667,-86.9125,-71.713333,-71.969017,-71.4,-78.633333))
+KenLatLong %>% 
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(icon = KenPic, popup=c("Cranston, RI", "Warwick, RI - I was born here!", "West Lafayette, IN - Purdue University where I went to college!", "Shrewsbury, MA", "Charlton, MA", "Franklin, MA","Raleigh, NC - where I live now!"))
+```

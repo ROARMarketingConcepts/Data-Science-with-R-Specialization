@@ -1,0 +1,44 @@
+---
+title: "Week 3 Assignment"
+author: "Ken Wood"
+date: "9/29/2020"
+output: ioslides_presentation
+---
+
+```{r echo=FALSE,message=FALSE}
+rm(list = ls())
+library(plotly)
+setwd("~/Desktop/Data Science with R/Developing Data Products/Week 3 Assignment")
+housingdata = read.csv("housingdata.csv")
+```
+
+```{r}
+dense <- density(housingdata$saleprice)
+```
+
+## Histogram of Housing Prices
+
+```{r echo=FALSE,message=FALSE}
+# set margins for plots
+m <- list(l = 50,r = 50,b = 50,t = 50,pad = 4)
+
+fig1 <- plot_ly(data = housingdata, x = ~saleprice, type = "histogram", name = "Histogram",width = 600, height = 350) %>% add_trace(x = dense$x, y = dense$y, type = "scatter", mode = "lines", fill = "tozeroy", yaxis = "y2",name="Density") %>%  layout(autosize = F,  margin = m) %>% layout(yaxis2 = list(overlaying = "y", side = "right",title = "Density"),title="Histogram & Density Chart of Saleprice") %>% layout(xaxis = list(title="Sale Price")) %>% layout(legend = list(x = 0.7, y = 0.9))
+fig1
+```
+
+## Box Plot of Saleprice vs. Overall Home Condition
+
+```{r echo=FALSE,message=FALSE}
+fig2 <- plot_ly(data = housingdata, x = ~overallcond, y = ~saleprice, type = "box", color=~housingdata$centralair,name=~housingdata$centralair) %>% layout(boxmode = "group") %>% layout(legend = list(x = 0.9, y = 0.9, title=list(text="Central Air")))
+
+fig2 <- fig2 %>% layout(yaxis = list(separators = ".,",title="Sale Price")) %>% layout(xaxis = list(title="Overall Home Condition (1-9)"))
+fig2
+```
+## Scatter Plot of Saleprice vs. Lot Area
+
+```{r echo=FALSE,message=FALSE}
+fig3 <- plot_ly(data = housingdata, x = ~lotarea, y = ~saleprice, type = "scatter", color=~overallcond) 
+fig3
+```
+
+

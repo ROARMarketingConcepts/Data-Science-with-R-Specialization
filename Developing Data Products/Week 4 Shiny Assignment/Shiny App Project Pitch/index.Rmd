@@ -1,0 +1,50 @@
+---
+title       : How Selected Home Features Affect Sale Price
+subtitle    : Developing Data Products in R - A Shiny App
+author      : Prepared by Ken Wood,
+job         : Data Scientist - ROAR Marketing Concepts LLC
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+## Overview
+
+- Investment bank client
+- Business Question: How do we optimally allocate investment dollars into mortgage-backed securities?
+- Investigate and quantify impact of factors that drive home prices. 
+
+---
+## The Dataset...
+
+```{r}
+setwd("~/Desktop/Data Science with R/Developing Data Products/Week 4 Assignment/Week4Assignment")
+library(tidyverse)
+housingdata <- read.csv("housingdata.csv")
+housingdata <- housingdata %>% select(lotarea,housestyle,overallcond,heating,
+                                    centralair,grlivarea,fullbath,halfbath,
+                                    bedroomabvgr,totrmsabvgrd,saleprice)
+head(housingdata,n=3L)
+```
+
+---
+## Example Box Plot Output
+
+```{r fig1, fig.height = 6, fig.width = 12}
+boxplot(saleprice~overallcond,data=housingdata,
+        xlab = "Overall Home Condition (1=Poor, 9=Excellent)",
+        ylab = "Sale Price ($)")
+```
+
+---
+## Example Linear Regression Output
+```{r fig2, fig.height = 5.5, fig.width = 12}
+fit <- lm(saleprice~grlivarea,data=housingdata)
+plot(saleprice~grlivarea,data=housingdata,
+        xlab = "Total Above Grade Living Area (sqFt)",
+        ylab = "Sale Price ($)")
+abline(fit,col=2)
+```
+---

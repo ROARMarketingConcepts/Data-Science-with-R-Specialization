@@ -1,0 +1,209 @@
+---
+title: "Data Science Capstone in R - Week 2 Analysis Using Quanteda Version"
+author: "Ken Wood"
+date: "10/11/2020"
+output: html_document
+---
+
+### Instructions
+The goal of this project is to display that we've become familiar with the data and that we are on track to create our prediction algorithm. This report (to be submitted on R Pubs (http://rpubs.com/)) explains our exploratory analysis and our goals for the eventual app and algorithm. This document should be concise and explain only the major features of the data we've identified and briefly summarize our plans for creating the prediction algorithm and Shiny app in a way that would be understandable to a non-data scientist manager. We will make use of tables and plots to illustrate important summaries of the data set. The motivation for this project is to: 
+
+1. Demonstrate that we've downloaded the data and have successfully loaded it in.
+2. Create a basic report of summary statistics about the data sets.
+3. Report any interesting findings that we have amassed so far.
+4. Get feedback on our plans for creating a prediction algorithm and Shiny app.
+
+### Considerations for the Analysis
+
+1. **Loading the data in.** This dataset is fairly large. We don't necessarily need to load the entire dataset in to build our algorithms (see point 2 below). At least initially, we might want to use a smaller subset of the data. Reading in chunks or lines using R's readLines or scan functions can be useful. 
+2. **Sampling.** To build our models we don't need to load in and use all of the data. Often relatively few randomly selected rows or chunks need to be included to get an accurate approximation to results that would be obtained using all the data. We might want to create a separate sub-sample dataset by reading in a random subset of the original data and writing it out to a separate file. That way, we can store the sample and not have to recreate it every time. We can use the rbinom function to "flip a biased coin" to determine whether we sample a line of text or not.
+
+### Review Criteria
+
+1. Does the link lead to an HTML page describing the exploratory analysis of the training data set?
+2. Has the data scientist done basic summaries of the three files? Word counts, line counts and basic data tables?
+3. Has the data scientist made basic plots, such as histograms to illustrate features of the data?
+4. Was the report written in a brief, concise style, in a way that a non-data scientist manager could appreciate?
+
+```{r setup, include=FALSE}
+rm(list = ls())
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Load the necessary R packages...
+```{r message=FALSE}
+library(R.utils)     # various R programming facilities
+library(ggplot2)     # ggplot plotting package
+# library(ngram)       # R package for constructing n-grams (“tokenizing”), as well as                           generating new text based on the n-gram structure of a given                             text input (“babbling”)
+library(dplyr)       # data manipulation utilities
+# library(slam)        # sparse lightweight arrays and matrices
+# library(tidytext)    # tidy text mining package
+# library(textmineR)   # functions for text mining and topic modeling
+# library(tau)         # text analysis utilities
+# library(stringi)     # character string processing package
+library(quanteda)    # quantitative text analysis package
+# library(readtext)
+# library(tm)          # text mining package
+# library(RWeka)       # a collection of machine learning algorithms for data mining tasks written in Java
+# library(SnowballC)   # a R interface to the C 'libstemmer' library that implements Porter's word stemming algorithm for collapsing words to a common root to aid comparison of vocabulary.
+```
+
+
+```{r}
+blogs <- "final/en_US/en_US.blogs.txt"
+news <- "final/en_US/en_US.news.txt"
+twitter <- "final/en_US/en_US.twitter.txt"
+```
+
+### Analysis for `en_US.blogs.txt`
+
+```{r}
+blog_line <- readLines(blogs,encoding="UTF-8", skipNul = TRUE)
+blog_corpus <- corpus(blog_line)
+num_blog_entries <- sapply(blogs,countLines)  # count number of entries in file
+print(paste("Number of entries - blogs: ",num_blog_entries))
+print(paste("Number of sentences - blogs: ",sum(nsentence(blog_corpus))))
+print(paste("Number of tokens - blogs: ",sum(ntoken(blog_corpus,remove_punct=TRUE))))
+```
+
+### Analysis for `en_US.news.txt`
+
+```{r}
+news_line <- readLines(news,encoding="UTF-8", skipNul = TRUE)
+news_corpus <- corpus(news_line)
+num_news_entries <- sapply(news,countLines)   # count number of lines in file
+print(paste("Number of entries - news: ",num_news_entries))
+print(paste("Number of sentences - news: ",sum(nsentence(news_corpus))))
+print(paste("Number of tokens - news: ",sum(ntoken(news_corpus,remove_punct=TRUE))))
+```
+
+### Analysis for `en_US.twitter.txt`
+
+```{r}
+twitter_line <- readLines(twitter,encoding="UTF-8", skipNul = TRUE)
+twitter_corpus <- corpus(twitter_line)
+num_twitter_entries <- sapply(twitter,countLines)   # count number of lines in file
+print(paste("Number of entries - twitter: ",num_twitter_entries))
+print(paste("Number of sentences - twitter: ",sum(nsentence(twitter_corpus))))
+print(paste("Number of tokens - twitter: ",sum(ntoken(twitter_corpus,remove_punct=TRUE))))
+```
+
+### Create a sample dataset using 10% each of the `.txt` files
+
+```{r}
+set.seed(42)
+
+data.sample <- c(blog_line[sample(1:length(blog_line),length(blog_line)*0.1)],
+                 news_line[sample(1:length(news_line),length(news_line)*0.1)],
+                 twitter_line[sample(1:length(twitter_line),length(twitter_line)*0.1)] )
+```
+
+#### Remove `blog_line`,`news_line` and `twitter_line` files and associated corpora to free up memory since we don't need them anymore.
+
+```{r}
+rm(list=c("blog_line","news_line","twitter_line","blog_corpus","news_corpus","twitter_corpus"))
+```
+
+### Create the sample corpus and clean it using the `quanteda` package...
+```{r}
+sample_corpus <-  corpus(data.sample)
+sample_tokens <- tokens(sample_corpus,what = "word",
+                        remove_punct = TRUE,
+                        remove_symbols = TRUE,
+                        remove_numbers = TRUE,
+                        remove_url = TRUE,
+                        remove_separators = TRUE,
+                        split_hyphens = FALSE,
+                        include_docvars = TRUE,
+                        padding = FALSE)
+sample_tokens <- tokens_tolower(sample_tokens)
+sample_tokens <- tokens_wordstem(sample_tokens, 
+                                 language = quanteda_options("language_stemmer"))
+sample_tokens <- tokens_select(sample_tokens, pattern = stopwords("en"), selection = "remove")
+```
+
+#### Create a plotting function for the n-grams...
+
+```{r}
+n_grams_plot <- function(n, data) {
+  
+  # use `reorder` function to sort the words in decreasing frequency
+  ggplot(data, aes(x=reorder(feature,-frequency,sum), y=frequency)) + 
+    geom_bar(stat="Identity") + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab(paste(n,"- grams")) + 
+    ylab("Frequency") + ggtitle(paste(n,"- gram Frequencies")) + 
+                                  theme(plot.title = element_text(hjust = 0.5))
+}
+```
+
+#### Let's get the word frequency distribution for the top 15 most occurring words...
+
+```{r}
+dfm_sample_tokens <- dfm(sample_tokens)
+one_gram_freq <- textstat_frequency(dfm_sample_tokens)
+head(one_gram_freq, 15)
+```
+
+#### Plot the frequencies of 1-grams...
+
+```{r}
+n_grams_plot(1,head(one_gram_freq,15))
+```
+
+
+#### Let's determine of frequency distribution of 2-grams
+
+```{r}
+two_grams <- dfm(tokens_ngrams(sample_tokens, n = 2))
+two_gram_freq <- textstat_frequency(two_grams)
+head(two_gram_freq,15)
+```
+
+#### Plot the frequencies of 2-grams...
+
+```{r}
+n_grams_plot(2,head(two_gram_freq,15))
+```
+
+#### Let's determine of frequency distribution of 3-grams
+
+```{r}
+three_grams <- dfm(tokens_ngrams(sample_tokens, n = 3))
+three_gram_freq <- textstat_frequency(three_grams)
+head(three_gram_freq,15)
+```
+
+#### Plot the frequencies of 3-grams...
+
+```{r}
+n_grams_plot(3,head(three_gram_freq,15))
+```
+
+
+#### Let's determine the frequency distribution of 4-grams
+
+```{r}
+four_grams <- dfm(tokens_ngrams(sample_tokens, n = 4))
+four_gram_freq <- textstat_frequency(four_grams)
+head(four_gram_freq,15)
+```
+
+#### Plot the frequencies of 4-grams...
+
+```{r}
+n_grams_plot(4,head(four_gram_freq,15))
+```
+
+#### Let's determine the frequency distribution of 5-grams
+
+```{r}
+five_grams <- dfm(tokens_ngrams(sample_tokens, n = 5))
+five_gram_freq <- textstat_frequency(five_grams)
+head(five_gram_freq,15)
+```
+
+#### Plot the frequencies of 5-grams...
+
+```{r}
+n_grams_plot(5,head(five_gram_freq,15))
+```

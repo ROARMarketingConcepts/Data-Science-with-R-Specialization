@@ -11,7 +11,7 @@
 
 <meta name="author" content="Ken Wood" />
 
-<meta name="date" content="2020-10-12" />
+<meta name="date" content="2020-10-15" />
 
 <title>Katz Backoff Example for NLP</title>
 
@@ -387,7 +387,7 @@ summary {
 
 <h1 class="title toc-ignore">Katz Backoff Example for NLP</h1>
 <h4 class="author">Ken Wood</h4>
-<h4 class="date">10/12/2020</h4>
+<h4 class="date">10/15/2020</h4>
 
 </div>
 
@@ -484,9 +484,9 @@ unigrs;bigrs;trigrs</code></pre>
 ## 4:   the_house_eos    3
 ## 5:   buy_the_house    2
 ## 6:    sos_sell_the    1
-## 7:   sell_the_book    1
-## 8:   sos_paint_the    1
-## 9: paint_the_house    1</code></pre>
+## 7:   sos_paint_the    1
+## 8: paint_the_house    1
+## 9:   sell_the_book    1</code></pre>
 </div>
 </div>
 <div id="step-1.-ii.-selecting-bigram-and-trigram-discounts" class="section level3">
@@ -657,7 +657,7 @@ alpha_big</code></pre>
 ## bigPre - single-element char array of the form w2_w1 which are first two
 ##          words of the trigram we are predicting the tail word of
 ## unobsTrigTails - character vector that are tail words of unobserved trigrams
-getBoBigrams &lt;- function(bigPre, unobsTrigTails) {
+getBOBigrams &lt;- function(bigPre, unobsTrigTails) {
     w_i_minus1 &lt;- str_split(bigPre, &quot;_&quot;)[[1]][2]
     boBigrams &lt;- paste(w_i_minus1, unobsTrigTails, sep = &quot;_&quot;)
     return(boBigrams)
@@ -671,8 +671,8 @@ getBoBigrams &lt;- function(bigPre, unobsTrigTails) {
 ## bigrs - 2 column data.frame or data.table. The first column: ngram,
 ##         contains all the bigrams in the corpus. The second column:
 ##         freq, contains the frequency/count of each bigram.
-getObsBoBigrams &lt;- function(bigPre, unobsTrigTails, bigrs) {
-    boBigrams &lt;- getBoBigrams(bigPre, unobsTrigTails)
+getObsBOBigrams &lt;- function(bigPre, unobsTrigTails, bigrs) {
+    boBigrams &lt;- getBOBigrams(bigPre, unobsTrigTails)
     obs_bo_bigrams &lt;- bigrs[bigrs$ngram %in% boBigrams, ]
     return(obs_bo_bigrams)
 }</code></pre>
@@ -681,11 +681,11 @@ getObsBoBigrams &lt;- function(bigPre, unobsTrigTails, bigrs) {
 ## bigPre -  single-element char array of the form w2_w1 which are first two
 ##           words of the trigram we are predicting the tail word of
 ## unobsTrigTails - character vector that are tail words of unobserved trigrams
-## obsBoBigram - data.frame which contains the observed bigrams in a column
+## obsBOBigram - data.frame which contains the observed bigrams in a column
 ##               named ngram
-getUnobsBoBigrams &lt;- function(bigPre, unobsTrigTails, obsBoBigram) {
-    boBigrams &lt;- getBoBigrams(bigPre, unobsTrigTails)
-    unobs_bigs &lt;- boBigrams[!(boBigrams %in% obsBoBigram$ngram)]
+getUnobsBOBigrams &lt;- function(bigPre, unobsTrigTails, obsBOBigram) {
+    boBigrams &lt;- getBOBigrams(bigPre, unobsTrigTails)
+    unobs_bigs &lt;- boBigrams[!(boBigrams %in% obsBOBigram$ngram)]
     return(unobs_bigs)
 }</code></pre>
 <pre class="r"><code>## Returns a dataframe of 2 columns: ngram and probs.  Values in the ngram
@@ -693,7 +693,7 @@ getUnobsBoBigrams &lt;- function(bigPre, unobsTrigTails, obsBoBigram) {
 ## two words in unobserved trigrams.  The values in the prob column are
 ## q_bo(w1 | w2) calculated from from equation 10.
 ##
-## obsBoBigrams - a dataframe with 2 columns: ngram and freq. The ngram column
+## obsBOBigrams - a dataframe with 2 columns: ngram and freq. The ngram column
 ##                contains bigrams of the form w1_w2 which are observed bigrams
 ##                that are the last 2 words of unobserved trigrams (i.e. &quot;backed
 ##                off&quot; bigrams). The freq column contains integers that are
@@ -702,11 +702,11 @@ getUnobsBoBigrams &lt;- function(bigPre, unobsTrigTails, obsBoBigram) {
 ##         ngram = unigram
 ##         freq = frequency/count of each unigram
 ## bigDisc - amount to discount observed bigrams
-getObsBigProbs &lt;- function(obsBoBigrams, unigs, bigDisc=0.5) {
-    first_words &lt;- str_split_fixed(obsBoBigrams$ngram, &quot;_&quot;, 2)[, 1]
+getObsBigProbs &lt;- function(obsBOBigrams, unigs, bigDisc=0.5) {
+    first_words &lt;- str_split_fixed(obsBOBigrams$ngram, &quot;_&quot;, 2)[, 1]
     first_word_freqs &lt;- unigs[unigs$ngram %in% first_words, ]
-    obsBigProbs &lt;- (obsBoBigrams$freq - bigDisc) / first_word_freqs$freq
-    obsBigProbs &lt;- data.frame(ngram=obsBoBigrams$ngram, prob=obsBigProbs)
+    obsBigProbs &lt;- (obsBOBigrams$freq - bigDisc) / first_word_freqs$freq
+    obsBigProbs &lt;- data.frame(ngram=obsBOBigrams$ngram, prob=obsBigProbs)
     
     return(obsBigProbs)
 }</code></pre>
@@ -715,24 +715,178 @@ getObsBigProbs &lt;- function(obsBoBigrams, unigs, bigDisc=0.5) {
 ## column are the backed off probability estimates q_bo(w1 | w2) calculated
 ## from from equation 16.
 ##
-## unobsBoBigrams - character vector of unobserved backed off bigrams
+## unobsBOBigrams - character vector of unobserved backed off bigrams
 ## unigs - 2 column data.frame of all the unigrams in the corpus:
 ##         ngram = unigram
 ##         freq = frequency/count of each unigram
 ## alphaBig - total discounted probability mass at the bigram level
-getQboUnobsBigrams &lt;- function(unobsBoBigrams, unigs, alphaBig) {
+getQboUnobsBigrams &lt;- function(unobsBOBigrams, unigs, alphaBig) {
     # get the unobserved bigram tails
-    qboUnobsBigs &lt;- str_split_fixed(unobsBoBigrams, &quot;_&quot;, 2)[, 2]
+    qboUnobsBigs &lt;- str_split_fixed(unobsBOBigrams, &quot;_&quot;, 2)[, 2]
     w_in_Aw_iminus1 &lt;- unigs[!(unigs$ngram %in% qboUnobsBigs), ]
     # convert to data.frame with counts
     qboUnobsBigs &lt;- unigs[unigs$ngram %in% qboUnobsBigs, ]
     denom &lt;- sum(qboUnobsBigs$freq)
     # converts counts to probabilities
-    qboUnobsBigs &lt;- data.frame(ngram=unobsBoBigrams,
+    qboUnobsBigs &lt;- data.frame(ngram=unobsBOBigrams,
                                prob=(alphaBig * qboUnobsBigs$freq / denom))
     
     return(qboUnobsBigs)
 }</code></pre>
+<pre class="r"><code># get backed off bigrams
+bo_bigrams &lt;- getBOBigrams(bigPre, unobs_trig_tails)  
+# separate bigrams which use eqn 10 and those that use 16
+obs_bo_bigrams &lt;- getObsBOBigrams(bigPre, unobs_trig_tails, bigrs)
+unobs_bo_bigrams &lt;- getUnobsBOBigrams(bigPre, unobs_trig_tails, obs_bo_bigrams)
+# unobs_bo_bigrams = c(&quot;the_buy&quot;, &quot;the_EOS&quot;, &quot;the_paint&quot;, &quot;the_sell&quot;, &quot;the_the&quot;)
+# calc obs&#39;d bigram prob&#39;s from eqn 10
+qbo_obs_bigrams &lt;- getObsBigProbs(obs_bo_bigrams, unigrs, gamma2) #ngram     probs
+# calc alpha_big &amp; unobs&#39;d bigram prob&#39;s from eqn 16             #the_house 0.3125
+unig &lt;- str_split(bigPre, &quot;_&quot;)[[1]][2]
+unig &lt;- unigrs[unigrs$ngram == unig,]
+# distrib discounted bigram prob mass to unobs bigrams in prop to unigram ML
+qbo_unobs_bigrams &lt;- getQboUnobsBigrams(unobs_bo_bigrams, unigrs, alpha_big)
+qbo_bigrams &lt;- rbind(qbo_obs_bigrams, qbo_unobs_bigrams)
+qbo_bigrams</code></pre>
+<pre><code>##       ngram       prob
+## 1 the_house 0.31250000
+## 2   the_sos 0.03125000
+## 3   the_the 0.03125000
+## 4   the_eos 0.03125000
+## 5   the_buy 0.02343750
+## 6  the_sell 0.00390625
+## 7 the_paint 0.00390625</code></pre>
+</div>
+<div id="checking-the-bigram-calculations" class="section level3">
+<h3>Checking the Bigram Calculations</h3>
+<p>Before doing the final calculations for the unobserved trigrams, let’s do a simple check on our calculations at the bigram level. In the previous table, all the bigrams except the_house are unobserved which means that if we sum all the unobserved bigram probabilities, we should get the total bigram discount which is <span class="math inline">\(\alpha(w_{i−1})\)</span>. As we see below, this looks like it checks out.</p>
+<pre class="r"><code>unobs &lt;- qbo_bigrams[-1,]
+sum(unobs$prob)</code></pre>
+<pre><code>## [1] 0.125</code></pre>
+</div>
+<div id="step-4.-iv.-calculate-discounted-probability-mass-at-the-trigram-level-alphaw_i2w_i1" class="section level3">
+<h3>Step 4. iv. Calculate discounted probability mass at the trigram level <span class="math inline">\(\alpha(w_{i−2},w_{i−1})\)</span></h3>
+<p>The <strong>getAlphaTrigram</strong> function shown below implements the following equation:  </p>
+<div class="line-block">           <span class="math inline">\(\alpha(w_{i-2},\:w_{i-1}) =\left[ 1 - \sum\limits_{w\:\in\:\mathcal{A}(w_{i-2},\:w_{i-1})} \frac{c^*(w_{i-2},\:w_{i-1},\:w)}{c(w_{i-2},\:w_{i-1})}\:\:\:\:\right]\)</span></div>
+<p> </p>
+<p>to compute the trigram discount. Here we use it to compute the trigram discount for <span class="math inline">\(q_{BO}(house|sell,the)\)</span>:</p>
+<pre class="r"><code>## Returns the total probability mass discounted from all observed trigrams.
+## This is the amount of probability mass which is
+## redistributed to UNOBSERVED trigrams. If no trigrams starting with
+## bigram$ngram[1] exist, 1 is returned.
+##
+## obsTrigs - 2 column data.frame or data.table. The first column: ngram,
+##            contains all the observed trigrams that start with the bigram
+##            prefix we are attempting to the predict the next word of. The 
+##            second column: freq, contains the frequency/count of each trigram.
+## bigram - single row frequency table where the first col: ngram, is the bigram
+##          which are the first two words of unobserved trigrams we want to
+##          estimate probabilities of (same as bigPre in other functions listed
+##          prior) delimited with &#39;_&#39;. The second column: freq, is the
+##          frequency/count of the bigram listed in the ngram column.
+## triDisc - amount to discount observed trigrams
+getAlphaTrigram &lt;- function(obsTrigs, bigram, triDisc=0.5) {
+    if(nrow(obsTrigs) &lt; 1) return(1)
+    alphaTri &lt;- 1 - sum((obsTrigs$freq - triDisc) / bigram$freq[1])
+    
+    return(alphaTri)
+}</code></pre>
+<pre class="r"><code>bigram &lt;- bigrs[bigrs$ngram %in% bigPre, ]
+alpha_trig &lt;- getAlphaTrigram(obs_trigrs, bigram, gamma3)
+alpha_trig</code></pre>
+<pre><code>## [1] 0.5</code></pre>
+</div>
+<div id="step-4.-v.-calculate-unobserved-trigram-probabilities-q_bow_iw_i2w_i1" class="section level3">
+<h3>Step 4. v. Calculate unobserved trigram probabilities <span class="math inline">\(q_{BO}(w_i|w_{i−2},w_{i−1})\)</span>:</h3>
+<pre class="r"><code>## Returns a dataframe of 2 columns: ngram and prob.  Values in the ngram
+## column are unobserved trigrams of the form: w3_w2_w1.  The values in the prob
+## column are q_bo(w1 | w3, w2) calculated from equation 17.
+##
+## bigPre -  single-element char array of the form w2_w1 which are first two
+##           words of the trigram we are predicting the tail word of
+## qboObsBigrams - 2 column data.frame with the following columns -
+##                 ngram: observed bigrams of the form w2_w1
+##                 probs: the probability estimate for observed bigrams:
+##                        qbo(w1 | w2) calc&#39;d from equation 10.
+## qboUnobsBigrams - 2 column data.frame with the following columns -
+##                   ngram: unobserved bigrams of the form w2_w1
+##                   probs: the probability estimate for unobserved bigrams
+##                          qbo(w1 | w2) calc&#39;d from equation 16.
+## alphaTrig - total discounted probability mass at the trigram level
+getUnobsTriProbs &lt;- function(bigPre, qboObsBigrams,
+                             qboUnobsBigrams, alphaTrig) {
+    qboBigrams &lt;- rbind(qboObsBigrams, qboUnobsBigrams)
+    qboBigrams &lt;- qboBigrams[order(-qboBigrams$prob), ]
+    sumQboBigs &lt;- sum(qboBigrams$prob)
+    first_bigPre_word &lt;- str_split(bigPre, &quot;_&quot;)[[1]][1]
+    unobsTrigNgrams &lt;- paste(first_bigPre_word, qboBigrams$ngram, sep=&quot;_&quot;)
+    unobsTrigProbs &lt;- alphaTrig * qboBigrams$prob / sumQboBigs
+    unobsTrigDf &lt;- data.frame(ngram=unobsTrigNgrams, prob=unobsTrigProbs)
+    
+    return(unobsTrigDf)
+}</code></pre>
+<pre class="r"><code>qbo_unobs_trigrams &lt;- getUnobsTriProbs(bigPre, qbo_obs_bigrams,
+                                       qbo_unobs_bigrams, alpha_trig)
+qbo_unobs_trigrams</code></pre>
+<pre><code>##            ngram        prob
+## 1 sell_the_house 0.357142857
+## 2   sell_the_sos 0.035714286
+## 3   sell_the_the 0.035714286
+## 4   sell_the_eos 0.035714286
+## 5   sell_the_buy 0.026785714
+## 6  sell_the_sell 0.004464286
+## 7 sell_the_paint 0.004464286</code></pre>
+</div>
+<div id="step-5.-select-w_i-with-the-highest-q_bow_iw_i2w_i1" class="section level3">
+<h3>Step 5. Select <span class="math inline">\(w_i\)</span> with the highest <span class="math inline">\(q_{BO}(w_i|w_{i−2},w_{i−1})\)</span></h3>
+<p>We’ve done all the calculations required to make our prediction. These are summarized in the table below:</p>
+<pre class="r"><code>getPredictionMsg &lt;- function(qbo_trigs) {
+    # pull off tail word of highest prob trigram
+    prediction &lt;- str_split(qbo_trigs$ngram[1], &quot;_&quot;)[[1]][3]
+    result &lt;- sprintf(&quot;%s%s%s%.4f&quot;, &quot;highest prob prediction is &gt;&gt;&gt; &quot;, prediction,&quot; &lt;&lt;&lt; which has probability = &quot;, qbo_trigs$prob[1])
+    return(result)
+}</code></pre>
+<pre class="r"><code>qbo_trigrams &lt;- rbind(qbo_obs_trigrams, qbo_unobs_trigrams)
+qbo_trigrams &lt;- qbo_trigrams[order(-qbo_trigrams$prob), ]  # sort by desc prob
+out_msg &lt;- getPredictionMsg(qbo_trigrams)
+out_msg</code></pre>
+<pre><code>## [1] &quot;highest prob prediction is &gt;&gt;&gt; book &lt;&lt;&lt; which has probability = 0.5000&quot;</code></pre>
+</div>
+<div id="going-a-little-deeper-exploring-an-interesting-question" class="section level3">
+<h3>Going a little deeper: Exploring an interesting question</h3>
+<p>Any good data scientist at this point would be asking themselves some questions about their results, especially if they have not worked with a particular algorithm before. A simple first check might be to test whether all the <span class="math inline">\(q_{BO}(w_i|w_{i−2},w_{i−1})\)</span> values sum to 1:</p>
+<pre class="r"><code>sum(qbo_trigrams$prob)</code></pre>
+<pre><code>## [1] 1</code></pre>
+<p>That looks O.K., so let’s explore something more interesting to see if we can deepen our understanding.</p>
+<p>In the example we just completed, our prediction of book was based on the fact that <span class="math inline">\(q_{BO}(book|sell,the)\)</span> was higher than any other <span class="math inline">\(q_{BO}(wi|sell,the)\)</span>. But this wasn’t really very interesting because sell the book was an observed trigram and the next closest probability <span class="math inline">\(q_{BO}(house|sell,the)\)</span> was based on an unobserved trigram sell the house. This leads us to wonder if observed trigrams always trump unobserved trigrams.</p>
+<p>We can prove to ourselves that this is not the case with a simple experiment. Let’s redo the above calculations with increased discount rates at both bigram and trigram levels. If we increase our discount rates from 0.5 to 0.7, what happens? If we set <span class="math inline">\(\gamma_2 = \gamma_3 = 0.7\)</span>, these are the results we get:</p>
+<pre class="r"><code>gamma2=0.7; gamma3=0.7  # initialize new discount rates
+
+obs_trigs &lt;- getObsTrigs(bigPre, trigrs)
+unobs_trig_tails &lt;- getUnobsTrigTails(obs_trigs$ngram, unigrs)
+bo_bigrams &lt;- getBOBigrams(bigPre, unobs_trig_tails)
+# separate bigrams which use eqn 10 and those that use 16
+obs_bo_bigrams &lt;- getObsBOBigrams(bigPre, unobs_trig_tails, bigrs)
+unobs_bo_bigrams &lt;- getUnobsBOBigrams(bigPre, unobs_trig_tails, obs_bo_bigrams)
+# calc obs&#39;d bigram prob&#39;s from eqn 10
+qbo_obs_bigrams &lt;- getObsBigProbs(obs_bo_bigrams, unigrs, gamma2)
+# calc alpha_big &amp; unobs&#39;d bigram prob&#39;s from eqn 16
+unig &lt;- str_split(bigPre, &quot;_&quot;)[[1]][2]
+unig &lt;- unigrs[unigrs$ngram == unig,]
+alpha_big &lt;- getAlphaBigram(unig, bigrs, gamma2)
+# distrib discounted bigram prob mass to unobs bigrams in prop to unigram ML
+qbo_unobs_bigrams &lt;- getQboUnobsBigrams(unobs_bo_bigrams, unigrs, alpha_big)
+# calc trigram probabilities - start with observed trigrams: eqn 12
+qbo_obs_trigrams &lt;- getObsTriProbs(obs_trigs, bigrs, bigPre, gamma3)
+# finally, calc trigram unobserved probabilities: eqn 17
+bigram &lt;- bigrs[bigrs$ngram %in% bigPre, ]
+alpha_trig &lt;- getAlphaTrigram(obs_trigs, bigram, gamma3)
+qbo_unobs_trigrams &lt;- getUnobsTriProbs(bigPre, qbo_obs_bigrams,
+                                       qbo_unobs_bigrams, alpha_trig)
+qbo_trigrams &lt;- rbind(qbo_obs_trigrams, qbo_unobs_trigrams)
+qbo_trigrams &lt;- qbo_trigrams[order(-qbo_trigrams$prob), ]
+getPredictionMsg(qbo_trigrams)</code></pre>
+<pre><code>## [1] &quot;highest prob prediction is &gt;&gt;&gt; house &lt;&lt;&lt; which has probability = 0.4351&quot;</code></pre>
 </div>
 
 

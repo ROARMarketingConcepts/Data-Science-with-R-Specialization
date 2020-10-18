@@ -1,0 +1,691 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Katz Backoff Example for NLP},
+  pdfauthor={Ken Wood},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{Katz Backoff Example for NLP}
+\author{Ken Wood}
+\date{10/12/2020}
+
+\begin{document}
+\maketitle
+
+\hypertarget{example-of-applying-the-algorithm-the-little-corpus-that-could}{%
+\subsubsection{Example of Applying the Algorithm: The Little Corpus That
+Could}\label{example-of-applying-the-algorithm-the-little-corpus-that-could}}
+
+As noted earlier, a corpus is a body of text from which we build and
+test LMs. To illustrate how the mathematical formulation of the KBO
+Trigram model works, it's helpful to look at a simple corpus that is
+small enough to easily keep track of the n-gram counts, but large enough
+to illustrate the impact of unobserved n-grams on the calculations.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{rm}\NormalTok{(}\DataTypeTok{list =} \KeywordTok{ls}\NormalTok{())}
+\KeywordTok{library}\NormalTok{(quanteda)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Package version: 2.1.2
+\end{verbatim}
+
+\begin{verbatim}
+## Parallel computing: 2 of 4 threads used.
+\end{verbatim}
+
+\begin{verbatim}
+## See https://quanteda.io for tutorials and examples.
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'quanteda'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:utils':
+## 
+##     View
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(data.table)}
+\KeywordTok{library}\NormalTok{(dplyr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'dplyr'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:data.table':
+## 
+##     between, first, last
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(stringr)}
+
+\NormalTok{ltcorpus \textless{}{-}}\StringTok{ }\KeywordTok{readLines}\NormalTok{(}\StringTok{"little\_test\_corpus1.txt"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in readLines("little_test_corpus1.txt"): incomplete final line found on
+## 'little_test_corpus1.txt'
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ltcorpus}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "SOS buy the book EOS"    "SOS buy the book EOS"   
+## [3] "SOS buy the book EOS"    "SOS buy the book EOS"   
+## [5] "SOS sell the book EOS"   "SOS buy the house EOS"  
+## [7] "SOS buy the house EOS"   "SOS paint the house EOS"
+\end{verbatim}
+
+In this corpus, SOS and EOS are tokens used to denote start of sentence
+and end-of-sentence.
+
+\hypertarget{step-1.-i.-unigram-bigram-and-trigram-counts}{%
+\subsubsection{Step 1. i. Unigram, Bigram and Trigram
+counts}\label{step-1.-i.-unigram-bigram-and-trigram-counts}}
+
+This work used the \texttt{quanteda} package written by Ken Benoit and
+Paul Nulty to construct the n-gram tables. Many data scientists say it
+performs much faster than \texttt{tm} and \texttt{RWeka} for these types
+of tasks and I tend to agree.
+
+\hypertarget{get-corpus-of-words-and-frequency-of-n-grams-from-text-file}{%
+\paragraph{Get corpus of words and frequency of n-grams from text
+file\ldots{}}\label{get-corpus-of-words-and-frequency-of-n-grams-from-text-file}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lt\_corpus \textless{}{-}}\StringTok{  }\KeywordTok{corpus}\NormalTok{(ltcorpus)}
+\NormalTok{lt\_corpus\_tokens \textless{}{-}}\StringTok{ }\KeywordTok{tokens}\NormalTok{(lt\_corpus)}
+
+\NormalTok{dfm\_lt\_corpus\_tokens \textless{}{-}}\StringTok{ }\KeywordTok{dfm}\NormalTok{(lt\_corpus\_tokens)}
+\NormalTok{unigrams\_freq \textless{}{-}}\StringTok{ }\KeywordTok{textstat\_frequency}\NormalTok{(dfm\_lt\_corpus\_tokens)}
+\NormalTok{unigrs \textless{}{-}}\StringTok{ }\KeywordTok{subset}\NormalTok{(unigrams\_freq,}\DataTypeTok{select=}\KeywordTok{c}\NormalTok{(feature,frequency))}
+\KeywordTok{names}\NormalTok{(unigrs) \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"ngram"}\NormalTok{,}\StringTok{"freq"}\NormalTok{)}
+\NormalTok{unigrs \textless{}{-}}\StringTok{ }\KeywordTok{as.data.table}\NormalTok{(unigrs)}
+
+\NormalTok{bigrams \textless{}{-}}\StringTok{ }\KeywordTok{dfm}\NormalTok{(}\KeywordTok{tokens\_ngrams}\NormalTok{(lt\_corpus\_tokens, }\DataTypeTok{n =} \DecValTok{2}\NormalTok{))}
+\NormalTok{bigrams\_freq \textless{}{-}}\StringTok{ }\KeywordTok{textstat\_frequency}\NormalTok{(bigrams)}
+\NormalTok{bigrs \textless{}{-}}\StringTok{ }\KeywordTok{subset}\NormalTok{(bigrams\_freq,}\DataTypeTok{select=}\KeywordTok{c}\NormalTok{(feature,frequency))}
+\KeywordTok{names}\NormalTok{(bigrs) \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"ngram"}\NormalTok{,}\StringTok{"freq"}\NormalTok{)}
+\NormalTok{bigrs \textless{}{-}}\StringTok{ }\KeywordTok{as.data.table}\NormalTok{(bigrs)}
+
+\NormalTok{trigrams \textless{}{-}}\StringTok{ }\KeywordTok{dfm}\NormalTok{(}\KeywordTok{tokens\_ngrams}\NormalTok{(lt\_corpus\_tokens, }\DataTypeTok{n =} \DecValTok{3}\NormalTok{))}
+\NormalTok{trigrams\_freq \textless{}{-}}\StringTok{ }\KeywordTok{textstat\_frequency}\NormalTok{(trigrams)}
+\NormalTok{trigrs \textless{}{-}}\StringTok{ }\KeywordTok{subset}\NormalTok{(trigrams\_freq,}\DataTypeTok{select=}\KeywordTok{c}\NormalTok{(feature,frequency))}
+\KeywordTok{names}\NormalTok{(trigrs) \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"ngram"}\NormalTok{,}\StringTok{"freq"}\NormalTok{)}
+\NormalTok{trigrs \textless{}{-}}\StringTok{ }\KeywordTok{as.data.table}\NormalTok{(trigrs)}
+
+\NormalTok{unigrs;bigrs;trigrs}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    ngram freq
+## 1:   sos    8
+## 2:   the    8
+## 3:   eos    8
+## 4:   buy    6
+## 5:  book    5
+## 6: house    3
+## 7:  sell    1
+## 8: paint    1
+\end{verbatim}
+
+\begin{verbatim}
+##         ngram freq
+##  1:   sos_buy    6
+##  2:   buy_the    6
+##  3:  the_book    5
+##  4:  book_eos    5
+##  5: the_house    3
+##  6: house_eos    3
+##  7:  sos_sell    1
+##  8:  sell_the    1
+##  9: sos_paint    1
+## 10: paint_the    1
+\end{verbatim}
+
+\begin{verbatim}
+##              ngram freq
+## 1:     sos_buy_the    6
+## 2:    the_book_eos    5
+## 3:    buy_the_book    4
+## 4:   the_house_eos    3
+## 5:   buy_the_house    2
+## 6:    sos_sell_the    1
+## 7:   sos_paint_the    1
+## 8: paint_the_house    1
+## 9:   sell_the_book    1
+\end{verbatim}
+
+\hypertarget{step-1.-ii.-selecting-bigram-and-trigram-discounts}{%
+\subsubsection{Step 1. ii. Selecting bigram and trigram
+discounts}\label{step-1.-ii.-selecting-bigram-and-trigram-discounts}}
+
+For this example, we'll use \(\gamma_2 = \gamma_3 = 0.5\) for the
+purpose of illustration. In practice, these values would be obtained by
+cross-validation. A great treatment of cross-validation can be found in
+Chapter 5 of this (free) book: ``An Introduction to Statistical
+Learning'' by Gareth James, et al.
+
+\hypertarget{step-2.-select-bigram-prefix-of-word-to-be-predicted}{%
+\subsubsection{Step 2. Select Bigram Prefix of Word to be
+Predicted}\label{step-2.-select-bigram-prefix-of-word-to-be-predicted}}
+
+For this example, we'll select the bigram: \texttt{sell} \texttt{the}
+
+\hypertarget{step-3.-calculate-probabilities-of-words-completing-observed-trigrams}{%
+\subsubsection{Step 3. Calculate Probabilities of Words Completing
+Observed
+Trigrams}\label{step-3.-calculate-probabilities-of-words-completing-observed-trigrams}}
+
+The code below finds the observed trigrams starting with the selected
+bigram prefix and calculates their probabilities. In our simple example,
+we can look at the table of trigrams above and see that there is only
+one trigram that starts with \texttt{sell} \texttt{the} which is
+\texttt{sell} \texttt{the} \texttt{book}.
+
+Recall that if we define \(\gamma_2\) to be the amount of discount taken
+from observed bigram counts, and \(\gamma_3\) the amount of discount
+taken from observed trigram counts, and \(c^∗\) to be the new discounted
+counts for observed bigrams and trigrams after applying the discount,
+then the backed off probability estimates would be written as:
+
+\(q_{BO}(w_i|w_{i−1})=c^∗(w_{i−1},w)c(w_{i−1})\) for observed bigrams,
+
+where \(c^∗(w_{i−1},w)=c(w_{i−1},w)−\gamma_2\),
+
+and
+
+\(q_{BO}(w_i|w_{i−2},w_{i−1})=c^∗(w_{i−2},w_{i−1},w)c(w_{i−2},w_{i−1})\)
+for observed trigrams,
+
+where \(c^∗(w_{i−2},w_{i−1},w)=c(w_{i−2},w_{i−1},w)−\gamma_3\).
+
+Applying these equations, we get \(q_{BO}(book|sell,the)=(1−0.5)/1=0.5\)
+which is also the result provided from the code below.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#\# Returns a two column data.frame of observed trigrams that start with the}
+\CommentTok{\#\# bigram prefix (bigPre) in the first column named ngram and}
+\CommentTok{\#\# frequencies/counts in the second column named freq. If no observed trigrams}
+\CommentTok{\#\# that start with bigPre exist, an empty data.frame is returned.}
+\CommentTok{\#\#}
+\CommentTok{\#\# bigPre {-}  single{-}element char array of the form w2\_w1 which are the first }
+\CommentTok{\#\#           two words of the trigram we are predicting the tail word of}
+\CommentTok{\#\# trigrams {-} 2 column data.frame or data.table. The first column: ngram,}
+\CommentTok{\#\#            contains all the trigrams in the corpus. The second column:}
+\CommentTok{\#\#            freq, contains the frequency/count of each trigram.}
+\NormalTok{getObsTrigs \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(bigPre, trigrams) \{}
+\NormalTok{    trigs.winA \textless{}{-}}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{ngrams=}\KeywordTok{vector}\NormalTok{(}\DataTypeTok{mode =} \StringTok{\textquotesingle{}character\textquotesingle{}}\NormalTok{, }\DataTypeTok{length =} \DecValTok{0}\NormalTok{),}
+                             \DataTypeTok{freq=}\KeywordTok{vector}\NormalTok{(}\DataTypeTok{mode =} \StringTok{\textquotesingle{}integer\textquotesingle{}}\NormalTok{, }\DataTypeTok{length =} \DecValTok{0}\NormalTok{))}
+\NormalTok{    regex \textless{}{-}}\StringTok{ }\KeywordTok{sprintf}\NormalTok{(}\StringTok{"\%s\%s\%s"}\NormalTok{, }\StringTok{"\^{}"}\NormalTok{, bigPre, }\StringTok{"\_"}\NormalTok{)}
+\NormalTok{    trigram\_indices \textless{}{-}}\StringTok{ }\KeywordTok{grep}\NormalTok{(regex, trigrams}\OperatorTok{$}\NormalTok{ngram)}
+    \ControlFlowTok{if}\NormalTok{(}\KeywordTok{length}\NormalTok{(trigram\_indices) }\OperatorTok{\textgreater{}}\StringTok{ }\DecValTok{0}\NormalTok{) \{}
+\NormalTok{        trigs.winA \textless{}{-}}\StringTok{ }\NormalTok{trigrams[trigram\_indices, ]}
+\NormalTok{    \}}
+    
+    \KeywordTok{return}\NormalTok{(trigs.winA)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#\# Returns a two column data.frame of observed trigrams that start with bigram}
+\CommentTok{\#\# prefix bigPre in the first column named ngram and the probabilities}
+\CommentTok{\#\# q\_bo(w\_i | w\_i{-}2, w\_i{-}1) in the second column named prob calculated from}
+\CommentTok{\#\# eqn 12. If no observed trigrams starting with bigPre exist, NULL is returned.}
+\CommentTok{\#\#}
+\CommentTok{\#\# obsTrigs {-} 2 column data.frame or data.table. The first column: ngram,}
+\CommentTok{\#\#            contains all the observed trigrams that start with the bigram}
+\CommentTok{\#\#            prefix bigPre which we are attempting to the predict the next}
+\CommentTok{\#\#            word of in a give phrase. The second column: freq, contains the}
+\CommentTok{\#\#            frequency/count of each trigram.}
+\CommentTok{\#\# bigrs {-} 2 column data.frame or data.table. The first column: ngram,}
+\CommentTok{\#\#         contains all the bigrams in the corpus. The second column:}
+\CommentTok{\#\#         freq, contains the frequency/count of each bigram.}
+\CommentTok{\#\# bigPre {-}  single{-}element char array of the form w2\_w1 which are first two}
+\CommentTok{\#\#           words of the trigram we are predicting the tail word of}
+\CommentTok{\#\# triDisc {-} amount to discount observed trigrams}
+\NormalTok{getObsTriProbs \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(obsTrigs, bigrs, bigPre, }\DataTypeTok{triDisc=}\FloatTok{0.5}\NormalTok{) \{}
+    \ControlFlowTok{if}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(obsTrigs) }\OperatorTok{\textless{}}\StringTok{ }\DecValTok{1}\NormalTok{) }\KeywordTok{return}\NormalTok{(}\OtherTok{NULL}\NormalTok{)}
+\NormalTok{    obsCount \textless{}{-}}\StringTok{ }\KeywordTok{subset}\NormalTok{(bigrs, ngram }\OperatorTok{==}\StringTok{ }\NormalTok{bigPre)}\OperatorTok{$}\NormalTok{freq[}\DecValTok{1}\NormalTok{]}
+\NormalTok{    obsTrigProbs \textless{}{-}}\StringTok{ }\KeywordTok{mutate}\NormalTok{(obsTrigs, }\DataTypeTok{freq=}\NormalTok{((freq }\OperatorTok{{-}}\StringTok{ }\NormalTok{triDisc) }\OperatorTok{/}\StringTok{ }\NormalTok{obsCount))}
+    \KeywordTok{colnames}\NormalTok{(obsTrigProbs) \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"ngram"}\NormalTok{, }\StringTok{"prob"}\NormalTok{)}
+    
+    \KeywordTok{return}\NormalTok{(obsTrigProbs)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{gamma2 \textless{}{-}}\StringTok{ }\FloatTok{0.5}  \CommentTok{\# bigram discount}
+\NormalTok{gamma3 \textless{}{-}}\StringTok{ }\FloatTok{0.5}  \CommentTok{\# trigram discount}
+\NormalTok{bigPre \textless{}{-}}\StringTok{ \textquotesingle{}sell\_the\textquotesingle{}}
+
+\NormalTok{obs\_trigrs \textless{}{-}}\StringTok{ }\KeywordTok{getObsTrigs}\NormalTok{(bigPre, trigrs)  }\CommentTok{\# get trigrams and counts}
+\CommentTok{\# convert counts to probabilities}
+\NormalTok{qbo\_obs\_trigrams \textless{}{-}}\StringTok{ }\KeywordTok{getObsTriProbs}\NormalTok{(obs\_trigrs, bigrs, bigPre, gamma3)}
+\NormalTok{qbo\_obs\_trigrams}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##            ngram prob
+## 1: sell_the_book  0.5
+\end{verbatim}
+
+\hypertarget{step-4.-calculate-probabilities-of-words-completing-unobserved-trigrams}{%
+\subsubsection{Step 4. Calculate Probabilities of Words Completing
+Unobserved
+Trigrams}\label{step-4.-calculate-probabilities-of-words-completing-unobserved-trigrams}}
+
+This is the the most complex step as it involves backing off to the
+bigram level. Here is a breakdown of the sub-steps for these
+calculations:
+
+\begin{enumerate}
+\def\labelenumi{\roman{enumi}.}
+\tightlist
+\item
+  Find all the words that complete unobserved trigrams. These are the
+  words in the set \(w\:\in\:\mathcal{B}(w_{i-2},\:w_{i-1})\) described
+  earlier. ~
+\end{enumerate}
+
+~
+
+\begin{enumerate}
+\def\labelenumi{\roman{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Calculate
+  \(\alpha(w_{i-1}) = \left[1 - \sum\limits_{w\:\in\:\mathcal{A}(w_{i-1})} \frac{c^*(w_{i-1},\:w)}{c(w_{i-1})}\:\:\:\:\right]\)
+  ~
+\end{enumerate}
+
+~
+
+\begin{enumerate}
+\def\labelenumi{\roman{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  Calculate \(q_{BO}\) for each bigram in the denominator of the
+  following equation:
+\end{enumerate}
+
+~~~~~~~~~~\(q_{BO}(w_i\:|\:w_{i-2},\:w_{i-1}) = \alpha(w_{i-2},\:w_{i-1})\frac{q_{BO}(w_i\:|\:w_{i-1})}{\sum\limits_{w\:\in\:\mathcal{B}(w_{i-2},\:w_{i-1})}q_{BO}(w\:|\:w_{i-1})}\)
+
+~
+
+~
+
+~~~~~~~~~~using
+\(q_{BO}(w_i\:|\:w_{i-1}) = \frac{c^*(w_{i-1},\:w)}{c(w_{i-1})}\:\:\:\:\)
+if the bigram is observed, or
+
+~
+
+~
+
+~~~~~~~~~~\(q_{BO}(w_i\:|\:w_{i-1}) = \alpha(w_{i-1})\frac{q_{ML}(w_i)}{\sum\limits_{w\:\in\:\mathcal{B}(w_{i-1})}q_{ML}(w)} = \alpha(w_{i-1})\frac{c(w_i)}{\sum\limits_{w\:\in\:\mathcal{B}(w_{i-1})}c(w)}\)
+if it is unobserved.
+
+~
+
+~
+
+\begin{enumerate}
+\def\labelenumi{\roman{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  Calculate
+  \(\alpha(w_{i−2},w_{i−1}) = \left [ 1 - \sum\limits_{w\:\in\:\mathcal{A}(w_{i-2},\:w_{i-1})} \frac{c^*(w_{i-2},\:w_{i-1},\:w)}{c(w_{i-2},\:w_{i-1})}\:\:\:\:\right]\)
+  ~
+\end{enumerate}
+
+~
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\setcounter{enumi}{21}
+\tightlist
+\item
+  Calculate
+  \(q_{BO}(w_i\:|\:w_{i-2},\:w_{i-1}) = \alpha(w_{i-2},\:w_{i-1})\frac{q_{BO}(w_i\:|\:w_{i-1})}{\sum\limits_{w\:\in\:\mathcal{B}(w_{i-2},\:w_{i-1})}q_{BO}(w\:|\:w_{i-1})}\)
+  for each \(w_i\) ~
+\end{enumerate}
+
+\hypertarget{step-4.-i.-find-unobserved-trigram-tail-words}{%
+\subsubsection{Step 4. i. Find unobserved trigram tail
+words:}\label{step-4.-i.-find-unobserved-trigram-tail-words}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#\# Returns a character vector which are the tail words of unobserved trigrams}
+\CommentTok{\#\# that start with the first two words of obsTrigs (aka the bigram prefix).}
+\CommentTok{\#\# These are the words w in the set B(w\_i{-}2, w\_i{-}1) as defined in the section}
+\CommentTok{\#\# describing the details of equation 17.}
+\CommentTok{\#\#}
+\CommentTok{\#\# obsTrigs {-} character vector of observed trigrams delimited by \_ of the form:}
+\CommentTok{\#\#            w3\_w2\_w1 where w3\_w2 is the bigram prefix}
+\CommentTok{\#\# unigs {-} 2 column data.frame of all the unigrams in the corpus:}
+\CommentTok{\#\#         ngram = unigram}
+\CommentTok{\#\#         freq = frequency/count of each unigram}
+
+\NormalTok{getUnobsTrigTails \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(obsTrigs, unigs) \{}
+\NormalTok{    obs\_trig\_tails \textless{}{-}}\StringTok{ }\KeywordTok{str\_split\_fixed}\NormalTok{(obsTrigs, }\StringTok{"\_"}\NormalTok{, }\DecValTok{3}\NormalTok{)[, }\DecValTok{3}\NormalTok{]}
+\NormalTok{    unobs\_trig\_tails \textless{}{-}}\StringTok{ }\NormalTok{unigs[}\OperatorTok{!}\NormalTok{(unigs}\OperatorTok{$}\NormalTok{ngram }\OperatorTok{\%in\%}\StringTok{ }\NormalTok{obs\_trig\_tails), ]}\OperatorTok{$}\NormalTok{ngram}
+    \KeywordTok{return}\NormalTok{(unobs\_trig\_tails)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{unobs\_trig\_tails \textless{}{-}}\StringTok{ }\KeywordTok{getUnobsTrigTails}\NormalTok{(obs\_trigrs}\OperatorTok{$}\NormalTok{ngram, unigrs)}
+\NormalTok{unobs\_trig\_tails}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "sos"   "the"   "eos"   "buy"   "house" "sell"  "paint"
+\end{verbatim}
+
+\hypertarget{step-4.-ii.-calculate-discounted-probability-mass-at-the-bigram-level-alphaw_i1}{%
+\subsubsection{\texorpdfstring{Step 4. ii. Calculate discounted
+probability mass at the bigram level
+\(\alpha(w_{i−1})\):}{Step 4. ii. Calculate discounted probability mass at the bigram level \textbackslash alpha(w\_\{i−1\}):}}\label{step-4.-ii.-calculate-discounted-probability-mass-at-the-bigram-level-alphaw_i1}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#\# Returns the total probability mass discounted from all observed bigrams}
+\CommentTok{\#\# calculated from equation 14.  This is the amount of probability mass which}
+\CommentTok{\#\# is redistributed to UNOBSERVED bigrams. If no bigrams starting with}
+\CommentTok{\#\# unigram$ngram[1] exist, 0 is returned.}
+\CommentTok{\#\#}
+\CommentTok{\#\# unigram {-} single row, 2 column frequency table. The first column: ngram,}
+\CommentTok{\#\#           contains the w\_i{-}1 unigram (2nd word of the bigram prefix). The}
+\CommentTok{\#\#           second column: freq, contains the frequency/count of this unigram.}
+\CommentTok{\#\# bigrams {-} 2 column data.frame or data.table. The first column: ngram,}
+\CommentTok{\#\#           contains all the bigrams in the corpus. The second column:}
+\CommentTok{\#\#           freq, contains the frequency or count of each bigram.}
+\CommentTok{\#\# bigDisc {-} amount to discount observed bigrams}
+
+\NormalTok{getAlphaBigram \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(unigram, bigrams, }\DataTypeTok{bigDisc=}\FloatTok{0.5}\NormalTok{) \{}
+    \CommentTok{\# get all bigrams that start with unigram}
+\NormalTok{    regex \textless{}{-}}\StringTok{ }\KeywordTok{sprintf}\NormalTok{(}\StringTok{"\%s\%s\%s"}\NormalTok{, }\StringTok{"\^{}"}\NormalTok{, unigram}\OperatorTok{$}\NormalTok{ngram[}\DecValTok{1}\NormalTok{], }\StringTok{"\_"}\NormalTok{)}
+\NormalTok{    bigsThatStartWithUnig \textless{}{-}}\StringTok{ }\NormalTok{bigrams[}\KeywordTok{grep}\NormalTok{(regex, bigrams}\OperatorTok{$}\NormalTok{ngram),]}
+    \ControlFlowTok{if}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(bigsThatStartWithUnig) }\OperatorTok{\textless{}}\StringTok{ }\DecValTok{1}\NormalTok{) }\KeywordTok{return}\NormalTok{(}\DecValTok{0}\NormalTok{)}
+\NormalTok{    alphaBi \textless{}{-}}\StringTok{ }\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{(}\KeywordTok{sum}\NormalTok{(bigsThatStartWithUnig}\OperatorTok{$}\NormalTok{freq }\OperatorTok{{-}}\StringTok{ }\NormalTok{bigDisc) }\OperatorTok{/}\StringTok{ }\NormalTok{unigram}\OperatorTok{$}\NormalTok{freq)}
+    
+    \KeywordTok{return}\NormalTok{(alphaBi)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{unig \textless{}{-}}\StringTok{ }\KeywordTok{str\_split}\NormalTok{(bigPre, }\StringTok{"\_"}\NormalTok{)[[}\DecValTok{1}\NormalTok{]][}\DecValTok{2}\NormalTok{]}
+\NormalTok{unig \textless{}{-}}\StringTok{ }\NormalTok{unigrs[unigrs}\OperatorTok{$}\NormalTok{ngram }\OperatorTok{==}\StringTok{ }\NormalTok{unig,]}
+\NormalTok{alpha\_big \textless{}{-}}\StringTok{ }\KeywordTok{getAlphaBigram}\NormalTok{(unig, bigrs, gamma2)}
+\NormalTok{alpha\_big}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.125
+\end{verbatim}
+
+\hypertarget{step-4.-iii.-calculate-backed-off-probabilities-q_bo-for-bigrams}{%
+\subsubsection{\texorpdfstring{Step 4. iii. Calculate backed off
+probabilities \(q_{BO}\) for
+bigrams}{Step 4. iii. Calculate backed off probabilities q\_\{BO\} for bigrams}}\label{step-4.-iii.-calculate-backed-off-probabilities-q_bo-for-bigrams}}
+
+The code below calculates \(q_{BO}(w_i|w_{i−1})\) for observed and
+unobserved bigrams:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#\# Returns a character vector of backed off bigrams of the form w2\_w1. These }
+\CommentTok{\#\# are all the (w\_i{-}1, w) bigrams where w\_i{-}1 is the tail word of the bigram}
+\CommentTok{\#\# prefix bigPre and w are the tail words of unobserved bigrams that start with}
+\CommentTok{\#\# w\_i{-}1.}
+\CommentTok{\#\#}
+\CommentTok{\#\# bigPre {-} single{-}element char array of the form w2\_w1 which are first two}
+\CommentTok{\#\#          words of the trigram we are predicting the tail word of}
+\CommentTok{\#\# unobsTrigTails {-} character vector that are tail words of unobserved trigrams}
+\NormalTok{getBoBigrams \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(bigPre, unobsTrigTails) \{}
+\NormalTok{    w\_i\_minus1 \textless{}{-}}\StringTok{ }\KeywordTok{str\_split}\NormalTok{(bigPre, }\StringTok{"\_"}\NormalTok{)[[}\DecValTok{1}\NormalTok{]][}\DecValTok{2}\NormalTok{]}
+\NormalTok{    boBigrams \textless{}{-}}\StringTok{ }\KeywordTok{paste}\NormalTok{(w\_i\_minus1, unobsTrigTails, }\DataTypeTok{sep =} \StringTok{"\_"}\NormalTok{)}
+    \KeywordTok{return}\NormalTok{(boBigrams)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#\# Returns a two column data.frame of backed{-}off bigrams in the first column}
+\CommentTok{\#\# named ngram and their frequency/counts in the second column named freq.}
+\CommentTok{\#\# }
+\CommentTok{\#\# bigPre {-}  single{-}element char array of the form w2\_w1 which are first two}
+\CommentTok{\#\#           words of the trigram we are predicting the tail word of}
+\CommentTok{\#\# unobsTrigTails {-} character vector that are tail words of unobserved trigrams}
+\CommentTok{\#\# bigrs {-} 2 column data.frame or data.table. The first column: ngram,}
+\CommentTok{\#\#         contains all the bigrams in the corpus. The second column:}
+\CommentTok{\#\#         freq, contains the frequency/count of each bigram.}
+\NormalTok{getObsBoBigrams \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(bigPre, unobsTrigTails, bigrs) \{}
+\NormalTok{    boBigrams \textless{}{-}}\StringTok{ }\KeywordTok{getBoBigrams}\NormalTok{(bigPre, unobsTrigTails)}
+\NormalTok{    obs\_bo\_bigrams \textless{}{-}}\StringTok{ }\NormalTok{bigrs[bigrs}\OperatorTok{$}\NormalTok{ngram }\OperatorTok{\%in\%}\StringTok{ }\NormalTok{boBigrams, ]}
+    \KeywordTok{return}\NormalTok{(obs\_bo\_bigrams)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#\# Returns a character vector of backed{-}off bigrams which are unobserved.}
+\CommentTok{\#\#}
+\CommentTok{\#\# bigPre {-}  single{-}element char array of the form w2\_w1 which are first two}
+\CommentTok{\#\#           words of the trigram we are predicting the tail word of}
+\CommentTok{\#\# unobsTrigTails {-} character vector that are tail words of unobserved trigrams}
+\CommentTok{\#\# obsBoBigram {-} data.frame which contains the observed bigrams in a column}
+\CommentTok{\#\#               named ngram}
+\NormalTok{getUnobsBoBigrams \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(bigPre, unobsTrigTails, obsBoBigram) \{}
+\NormalTok{    boBigrams \textless{}{-}}\StringTok{ }\KeywordTok{getBoBigrams}\NormalTok{(bigPre, unobsTrigTails)}
+\NormalTok{    unobs\_bigs \textless{}{-}}\StringTok{ }\NormalTok{boBigrams[}\OperatorTok{!}\NormalTok{(boBigrams }\OperatorTok{\%in\%}\StringTok{ }\NormalTok{obsBoBigram}\OperatorTok{$}\NormalTok{ngram)]}
+    \KeywordTok{return}\NormalTok{(unobs\_bigs)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#\# Returns a dataframe of 2 columns: ngram and probs.  Values in the ngram}
+\CommentTok{\#\# column are bigrams of the form: w2\_w1 which are observed as the last}
+\CommentTok{\#\# two words in unobserved trigrams.  The values in the prob column are}
+\CommentTok{\#\# q\_bo(w1 | w2) calculated from from equation 10.}
+\CommentTok{\#\#}
+\CommentTok{\#\# obsBoBigrams {-} a dataframe with 2 columns: ngram and freq. The ngram column}
+\CommentTok{\#\#                contains bigrams of the form w1\_w2 which are observed bigrams}
+\CommentTok{\#\#                that are the last 2 words of unobserved trigrams (i.e. "backed}
+\CommentTok{\#\#                off" bigrams). The freq column contains integers that are}
+\CommentTok{\#\#                the counts of these observed bigrams in the corpus.}
+\CommentTok{\#\# unigs {-} 2 column data.frame of all the unigrams in the corpus:}
+\CommentTok{\#\#         ngram = unigram}
+\CommentTok{\#\#         freq = frequency/count of each unigram}
+\CommentTok{\#\# bigDisc {-} amount to discount observed bigrams}
+\NormalTok{getObsBigProbs \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(obsBoBigrams, unigs, }\DataTypeTok{bigDisc=}\FloatTok{0.5}\NormalTok{) \{}
+\NormalTok{    first\_words \textless{}{-}}\StringTok{ }\KeywordTok{str\_split\_fixed}\NormalTok{(obsBoBigrams}\OperatorTok{$}\NormalTok{ngram, }\StringTok{"\_"}\NormalTok{, }\DecValTok{2}\NormalTok{)[, }\DecValTok{1}\NormalTok{]}
+\NormalTok{    first\_word\_freqs \textless{}{-}}\StringTok{ }\NormalTok{unigs[unigs}\OperatorTok{$}\NormalTok{ngram }\OperatorTok{\%in\%}\StringTok{ }\NormalTok{first\_words, ]}
+\NormalTok{    obsBigProbs \textless{}{-}}\StringTok{ }\NormalTok{(obsBoBigrams}\OperatorTok{$}\NormalTok{freq }\OperatorTok{{-}}\StringTok{ }\NormalTok{bigDisc) }\OperatorTok{/}\StringTok{ }\NormalTok{first\_word\_freqs}\OperatorTok{$}\NormalTok{freq}
+\NormalTok{    obsBigProbs \textless{}{-}}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{ngram=}\NormalTok{obsBoBigrams}\OperatorTok{$}\NormalTok{ngram, }\DataTypeTok{prob=}\NormalTok{obsBigProbs)}
+    
+    \KeywordTok{return}\NormalTok{(obsBigProbs)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#\# Returns a dataframe of 2 columns: ngram and prob.  Values in the ngram}
+\CommentTok{\#\# column are unobserved bigrams of the form: w2\_w1.  The values in the prob}
+\CommentTok{\#\# column are the backed off probability estimates q\_bo(w1 | w2) calculated}
+\CommentTok{\#\# from from equation 16.}
+\CommentTok{\#\#}
+\CommentTok{\#\# unobsBoBigrams {-} character vector of unobserved backed off bigrams}
+\CommentTok{\#\# unigs {-} 2 column data.frame of all the unigrams in the corpus:}
+\CommentTok{\#\#         ngram = unigram}
+\CommentTok{\#\#         freq = frequency/count of each unigram}
+\CommentTok{\#\# alphaBig {-} total discounted probability mass at the bigram level}
+\NormalTok{getQboUnobsBigrams \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(unobsBoBigrams, unigs, alphaBig) \{}
+    \CommentTok{\# get the unobserved bigram tails}
+\NormalTok{    qboUnobsBigs \textless{}{-}}\StringTok{ }\KeywordTok{str\_split\_fixed}\NormalTok{(unobsBoBigrams, }\StringTok{"\_"}\NormalTok{, }\DecValTok{2}\NormalTok{)[, }\DecValTok{2}\NormalTok{]}
+\NormalTok{    w\_in\_Aw\_iminus1 \textless{}{-}}\StringTok{ }\NormalTok{unigs[}\OperatorTok{!}\NormalTok{(unigs}\OperatorTok{$}\NormalTok{ngram }\OperatorTok{\%in\%}\StringTok{ }\NormalTok{qboUnobsBigs), ]}
+    \CommentTok{\# convert to data.frame with counts}
+\NormalTok{    qboUnobsBigs \textless{}{-}}\StringTok{ }\NormalTok{unigs[unigs}\OperatorTok{$}\NormalTok{ngram }\OperatorTok{\%in\%}\StringTok{ }\NormalTok{qboUnobsBigs, ]}
+\NormalTok{    denom \textless{}{-}}\StringTok{ }\KeywordTok{sum}\NormalTok{(qboUnobsBigs}\OperatorTok{$}\NormalTok{freq)}
+    \CommentTok{\# converts counts to probabilities}
+\NormalTok{    qboUnobsBigs \textless{}{-}}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{ngram=}\NormalTok{unobsBoBigrams,}
+                               \DataTypeTok{prob=}\NormalTok{(alphaBig }\OperatorTok{*}\StringTok{ }\NormalTok{qboUnobsBigs}\OperatorTok{$}\NormalTok{freq }\OperatorTok{/}\StringTok{ }\NormalTok{denom))}
+    
+    \KeywordTok{return}\NormalTok{(qboUnobsBigs)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+
+\end{document}

@@ -1,0 +1,68 @@
+---
+title: "Data Science Capstone in R - Week 1 Quiz"
+author: "Ken Wood"
+date: "10/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Question 1
+The `en_US.blogs.txt`  file is how many megabytes?
+```{r}
+file.info("final/en_US/en_US.blogs.txt")
+```
+
+Answer: 210 MB
+
+
+#### Question 2 
+The `en_US.twitter.txt` has how many lines of text?
+```{r}
+library(R.utils)
+sapply("final/en_US/en_US.twitter.txt",countLines)
+```
+
+#### Question 3 
+What is the length of the longest line seen in any of the three en_US data sets?
+```{r}
+blogs <- "final/en_US/en_US.blogs.txt"
+news <- "final/en_US/en_US.news.txt"
+twitter <- "final/en_US/en_US.twitter.txt"
+
+blog.line<-readLines(blogs,encoding="UTF-8", skipNul = TRUE)
+news.line<-readLines(news,encoding="UTF-8", skipNul = TRUE)
+twitter.line<-readLines(twitter,encoding="UTF-8", skipNul = TRUE)
+
+blog.char.count <- nchar(blog.line)
+news.char.count <- nchar(news.line)
+twitter.char.count <- nchar(twitter.line)
+
+print(paste("length of longest 'blog' line: ",max(blog.char.count)," characters"))
+print(paste("length of longest 'news' line: ",max(news.char.count)," characters"))
+print(paste("length of longest 'twitter' line: ",max(twitter.char.count)," characters"))
+```
+
+#### Question 4
+In the en_US twitter data set, if you divide the number of lines where the word "love" (all lowercase) occurs by the number of lines the word "hate" (all lowercase) occurs, about what do you get?
+
+```{r}
+library(stringr)
+length(str_subset(twitter.line,"love"))/
+  length(str_subset(twitter.line,"hate"))
+```
+
+#### Question 5
+The one tweet in the en_US twitter data set that matches the word "biostats" says what?
+```{r}
+str_subset(twitter.line,"biostats")
+```
+
+#### Question 6
+How many tweets have the exact characters "A computer once beat me at chess, but it was no match for me at kickboxing". (I.e. the line matches those characters exactly.)
+
+```{r}
+length(str_subset(twitter.line,"A computer once beat me at chess, but it was no match for me at kickboxing"))
+```

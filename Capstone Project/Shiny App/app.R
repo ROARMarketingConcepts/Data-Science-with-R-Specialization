@@ -70,7 +70,7 @@ ui <- shinyUI(navbarPage("Capstone Project in R - Shiny Application (Prepared by
                                 mainPanel(
                                     tabsetPanel(type = "tabs", 
                                                 tabPanel("Top 5 Predictions",DT::dataTableOutput("word_list")),
-                                                tabPanel("Column Chart", plotOutput("ColumnChart"))
+                                                tabPanel("Column Chart")
                                     )
                                 )
                             )
@@ -138,11 +138,11 @@ server <- shinyServer(function(input, output) {
     }) 
 
     # Render a barplot
-    output$ColumnChart <- renderPlot({
-      barplot(word_list$prob,main="Top 5 Tri-gram Probabilities",
-            ylab="Probability",
-            xlab="Tri-Gram")
-    })
+    # output$ColumnChart <- renderPlot({
+    #  barplot(word_list$prob,main="Top 5 Tri-gram Probabilities",
+    #        ylab="Probability",
+    #        xlab="Tri-Gram")
+    #})
 
 })
 

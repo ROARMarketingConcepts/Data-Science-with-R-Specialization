@@ -14,13 +14,13 @@ unigrs <- fread("data/unigrs.csv")
 bigrs <- fread("data/bigrs.csv")
 trigrs <- fread("data/trigrs.csv")
 
-## Returns a two column data.frame of observed trigrams that start with the
+## This function returns a two column data.frame of observed trigrams that start with the
 ## bigram prefix (bigPre) in the first column named ngram and
 ## frequencies/counts in the second column named freq. If no observed trigrams
 ## that start with bigPre exist, an empty data.frame is returned.
 ##
 ## bigPre -  single-element char array of the form w2_w1 which are the first 
-##           two words of the trigram we are predicting the tail word of
+##           two words of the trigram whose tail word we are predicting.
 ## trigrams - 2 column data.frame or data.table. The first column: ngram,
 ##            contains all the trigrams in the corpus. The second column:
 ##            freq, contains the frequency/count of each trigram.
@@ -36,10 +36,10 @@ getObsTrigs <- function(bigPre, trigrams) {
   return(trigs.winA)
 }
 
-## Returns a two column data.frame of observed trigrams that start with bigram
+## This function returns a two column data.frame of observed trigrams that start with bigram
 ## prefix bigPre in the first column named ngram and the probabilities
-## q_bo(w_i | w_i-2, w_i-1) in the second column named prob calculated from
-## eqn 12. If no observed trigrams starting with bigPre exist, NULL is returned.
+## q_bo(w_i | w_i-2, w_i-1) in the second column named prob. If no observed trigrams 
+## starting with bigPre exist, NULL is returned.
 ##
 ## obsTrigs - 2 column data.frame or data.table. The first column: ngram,
 ##            contains all the observed trigrams that start with the bigram
@@ -61,10 +61,9 @@ getObsTriProbs <- function(obsTrigs, bigrs, bigPre, triDisc=0.5) {
   return(obsTrigProbs)
 }
 
-## Returns a character vector which are the tail words of unobserved trigrams
+## This function returns a character vector which are the tail words of unobserved trigrams
 ## that start with the first two words of obsTrigs (aka the bigram prefix).
-## These are the words w in the set B(w_i-2, w_i-1) as defined in the section
-## describing the details of equation 17.
+## These are the words w in the set B(w_i-2, w_i-1).
 ##
 ## obsTrigs - character vector of observed trigrams delimited by _ of the form:
 ##            w3_w2_w1 where w3_w2 is the bigram prefix
@@ -78,8 +77,8 @@ getUnobsTrigTails <- function(obsTrigs, unigs) {
   return(unobs_trig_tails)
 }
 
-## Returns the total probability mass discounted from all observed bigrams
-## calculated from equation 14.  This is the amount of probability mass which
+## This function returns the total probability mass discounted from 
+## all observed bigrams.  This is the amount of probability mass which
 ## is redistributed to UNOBSERVED bigrams. If no bigrams starting with
 ## unigram$ngram[1] exist, 0 is returned.
 ##
@@ -101,7 +100,7 @@ getAlphaBigram <- function(unigram, bigrams, bigDisc=0.5) {
   return(alphaBi)
 }
 
-## Returns a character vector of backed off bigrams of the form w2_w1. These 
+## This function returns a character vector of backed off bigrams of the form w2_w1. These 
 ## are all the (w_i-1, w) bigrams where w_i-1 is the tail word of the bigram
 ## prefix bigPre and w are the tail words of unobserved bigrams that start with
 ## w_i-1.
@@ -115,7 +114,7 @@ getBOBigrams <- function(bigPre, unobsTrigTails) {
   return(boBigrams)
 }
 
-## Returns a two column data.frame of backed-off bigrams in the first column
+## This function returns a two column data.frame of backed-off bigrams in the first column
 ## named ngram and their frequency/counts in the second column named freq.
 ## 
 ## bigPre -  single-element char array of the form w2_w1 which are first two
@@ -130,7 +129,7 @@ getObsBOBigrams <- function(bigPre, unobsTrigTails, bigrs) {
   return(obs_bo_bigrams)
 }
 
-## Returns a character vector of backed-off bigrams which are unobserved.
+## This function returns a character vector of backed-off bigrams which are unobserved.
 ##
 ## bigPre -  single-element char array of the form w2_w1 which are first two
 ##           words of the trigram we are predicting the tail word of
@@ -143,10 +142,10 @@ getUnobsBOBigrams <- function(bigPre, unobsTrigTails, obsBOBigram) {
   return(unobs_bigs)
 }
 
-## Returns a dataframe of 2 columns: ngram and probs.  Values in the ngram
+## This function returns a dataframe of 2 columns: ngram and probs.  Values in the ngram
 ## column are bigrams of the form: w2_w1 which are observed as the last
 ## two words in unobserved trigrams.  The values in the prob column are
-## q_bo(w1 | w2) calculated from from equation 10.
+## q_bo(w1 | w2).
 ##
 ## obsBOBigrams - a dataframe with 2 columns: ngram and freq. The ngram column
 ##                contains bigrams of the form w1_w2 which are observed bigrams
@@ -166,10 +165,9 @@ getObsBigProbs <- function(obsBOBigrams, unigs, bigDisc=0.5) {
   return(obsBigProbs)
 }
 
-## Returns a dataframe of 2 columns: ngram and prob.  Values in the ngram
+## This function returns a dataframe of 2 columns: ngram and prob.  Values in the ngram
 ## column are unobserved bigrams of the form: w2_w1.  The values in the prob
-## column are the backed off probability estimates q_bo(w1 | w2) calculated
-## from from equation 16.
+## column are the backed off probability estimates q_bo(w1 | w2).
 ##
 ## unobsBOBigrams - character vector of unobserved backed off bigrams
 ## unigs - 2 column data.frame of all the unigrams in the corpus:
@@ -190,7 +188,7 @@ getQboUnobsBigrams <- function(unobsBOBigrams, unigs, alphaBig) {
   return(qboUnobsBigs)
 }
 
-## Returns the total probability mass discounted from all observed trigrams.
+## This function returns the total probability mass discounted from all observed trigrams.
 ## This is the amount of probability mass which is
 ## redistributed to UNOBSERVED trigrams. If no trigrams starting with
 ## bigram$ngram[1] exist, 1 is returned.
@@ -212,9 +210,9 @@ getAlphaTrigram <- function(obsTrigs, bigram, triDisc=0.5) {
   return(alphaTri)
 }
 
-## Returns a dataframe of 2 columns: ngram and prob.  Values in the ngram
+## This function returns a dataframe of 2 columns: ngram and prob.  Values in the ngram
 ## column are unobserved trigrams of the form: w3_w2_w1.  The values in the prob
-## column are q_bo(w1 | w3, w2) calculated from equation 17.
+## column are q_bo(w1 | w3, w2).
 ##
 ## bigPre -  single-element char array of the form w2_w1 which are first two
 ##           words of the trigram we are predicting the tail word of
@@ -247,6 +245,8 @@ getPredictionMsg <- function(qbo_trigs) {
   return(result)
 }
 
+## And finally, the predict_word function which returns a data table with predicted 
+## tri-grams and their associated probabilities.
 predict_word <- function(bigPre,unigrs,bigrs,trigrs){
   gamma2=0.7; gamma3=0.7  # initialize new discount rates
   obs_trigs <- getObsTrigs(bigPre, trigrs)

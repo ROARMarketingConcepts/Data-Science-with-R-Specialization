@@ -15,7 +15,7 @@ shinyServer(function(input, output) {
   output$Original <- renderText({
     input_str <- str_split(input$user_input," ",simplify=TRUE)
     if (length(input_str) != 2) {
-      OriginalTextInput <- "Enter valid input"
+      OriginalTextInput <- "Processing..."
     } else {
       OriginalTextInput <- input$user_input  
     }        

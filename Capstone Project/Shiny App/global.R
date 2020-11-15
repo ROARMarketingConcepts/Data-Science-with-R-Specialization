@@ -1,13 +1,18 @@
+# title: "Data Science with R - Capstone Project"
+# author: "Ken Wood"
+# date: "11/15/2020"
+# filename: global.R
+
+library(dplyr)
 library(quanteda)
 library(data.table)
-library(dplyr)
 library(stringr)
 
 ### Read in the unigram, bigram, and trigam entries and frequencies...
 
-unigrs <- fread("unigrs.csv")
-bigrs <- fread("bigrs.csv")
-trigrs <- fread("trigrs.csv")
+unigrs <- fread("data/unigrs.csv")
+bigrs <- fread("data/bigrs.csv")
+trigrs <- fread("data/trigrs.csv")
 
 ## Returns a two column data.frame of observed trigrams that start with the
 ## bigram prefix (bigPre) in the first column named ngram and

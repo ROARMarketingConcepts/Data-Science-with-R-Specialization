@@ -6,9 +6,9 @@
 library(shiny)
 library(quanteda)
 library(data.table)
-library(dplyr)
 library(stringr)
 library(tidyverse)
+library(dplyr)
 
 shinyServer(function(input, output) {
   
@@ -62,11 +62,5 @@ shinyServer(function(input, output) {
     return(DT::datatable(word_list[1:5,],options=list(dom="t")))
   }) 
   
-  # Render a barplot
-  # output$ColumnChart <- renderPlot({
-  #  barplot(word_list$prob,main="Top 5 Tri-gram Probabilities",
-  #        ylab="Probability",
-  #        xlab="Tri-Gram")
-  #})
   
 })

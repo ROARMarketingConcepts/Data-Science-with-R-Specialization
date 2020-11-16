@@ -6,7 +6,7 @@
 
 library(shiny)
 
-shinyUI(navbarPage("Capstone Project in R - Shiny Application (Prepared by Ken Wood)",
+shinyUI(navbarPage("Data Science with R - Capstone Project (Prepared by Ken Wood)",
                    tabPanel("Overview",
                             h2("Overview"),
                             h3("Natural Language Processing (NLP) using the Katz Back-off Algorithm"),
@@ -54,7 +54,7 @@ shinyUI(navbarPage("Capstone Project in R - Shiny Application (Prepared by Ken W
                               sidebarLayout(
                                 sidebarPanel(
                                   textInput("user_input", "Enter in two leading words and then press 'Predict':"),
-                                  submitButton("Predict"),
+                                  submitButton("Predict Third Word"),
                                   br(),
                                   h5("You entered the following leading words:", style = "color:blue"),
                                   div(textOutput("Original"), style = "color:black"),
@@ -65,8 +65,8 @@ shinyUI(navbarPage("Capstone Project in R - Shiny Application (Prepared by Ken W
                                 
                                 mainPanel(
                                   tabsetPanel(type = "tabs", 
-                                              tabPanel("Top 5 Predictions",DT::dataTableOutput("word_list")),
-                                              tabPanel("Column Chart")
+                                              tabPanel("Top 5 Predictions",DT::dataTableOutput("word_list"))
+                      
                                   )
                                 )
                               )

@@ -1,0 +1,54 @@
+---
+title: "Capstone Project Presentation"
+subtitle: "Data Science with R"
+author: "Prepared by Ken Wood"
+date: "11/15/2020"
+output: ioslides_presentation
+---
+
+<style>
+p.caption {
+  font-size: 0.5em;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(knitr.table.format = "html") 
+```
+
+## Executive Summary
+
+- Natural Language Processing App
+  + All code implemented using `R`
+  + Hosted at https://www.shinyapps.io
+$$\\$$
+- Goal: Predict third word of tri-gram given two leading words
+$$\\$$
+- Use **Katz Back-Off Method** for predictions
+  + Provide list of word predictions along with probabilities
+
+## Training Corpus & Prediction Method
+- Three (very large) starter files
+  + `en_US.blogs.txt`
+  + `en_US.news.txt`
+  + `en_US.twitter.txt`
+
+- Create a sample dataset using 5% each of the `.txt` files
+  + Corpus created and cleaned using the `quanteda` package.
+
+- Katz Back-Off Prediction Method
+  + A generative n-gram language model that estimates the conditional probability of a word given its history in the n-gram of a training corpus.
+
+## Shiny App Interface
+
+![Screenshot from https://roarmarketingconcepts.shinyapps.io/CapstoneProject-ShinyApp/ ](/Users/woodzsan/Desktop/Data Science with R/Capstone Project/Week 6/Shiny App Interface.png){width=100%}
+
+
+## References
+
+- [Predicting Next Word Using Katz Backoff - Michael Szczepaniak](https://rpubs.com/mszczepaniak/predictkbo3model)
+$$\\$$
+- [Katz's Backoff Model - Wikipedia article](https://en.wikipedia.org/wiki/Katz%27s_back-off_model)
+$$\\$$
+- [Developing Data Products in R Course - Johns Hopkins University on Coursera](https://www.coursera.org/learn/data-products/home/info)
